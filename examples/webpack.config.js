@@ -41,7 +41,8 @@ module.exports = {
 
   resolve: {
     alias: {
-      'react-forms$': src,
+      'react-forms$': src+'/react-forms',
+      'react-dumb-forms$': src
     },
   },
 
