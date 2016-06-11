@@ -1,4 +1,7 @@
 import React from 'react';
+import ifErrorGenerator from './components/ifErrorGenerator';
+import dumbLabelGenerator from './components/dumbLabelGenerator';
+import _ from 'lodash';
 
 function connectForm(newForm, ...args) {
 
@@ -6,13 +9,14 @@ function connectForm(newForm, ...args) {
     return {...pointer, ...arg};
   }, {});
 
-  const {getError, getErrors, labelComponent, errorComponent} = options;
+  const {getError = _.noop, getErrors = _.noop, LabelComponent, ErrorComponent, DefaultComponent} = options;
 
   class BoundForm extends React.Component {
     constructor(props) {
       super(props);
       this.getError = this.getError.bind(this);
-      this.getErrors = getErrors.bind(this);
+      this.ifError = this.ifError.bind(this);
+      this.getErrors = this.getErrors.bind(this);
       this.getDirt = this.getDirt.bind(this);
       this.getModel = this.getModel.bind(this);
       this.getValue = this.getValue.bind(this);
@@ -22,9 +26,10 @@ function connectForm(newForm, ...args) {
       this.onFocus = this.onFocus.bind(this);
       this.formProps = this.formProps.bind(this);
       this.propsFor = this.propsFor.bind(this);
+      this.componentRequirementMissing = this.componentRequirementMissing.bind(this);
       this.errorFor = this.errorFor.bind(this);
+      this.labelPropsFor = this.labelPropsFor.bind(this);
       this.formatErrors = this.formatErrors.bind(this);
-      this.DumbLabel = this.DumbLabel.bind(this);
       this.getErrorArray = this.getErrorArray.bind(this);
       this.genId = this.genId.bind(this);
       this.getFieldId = this.getFieldId.bind(this);
@@ -43,11 +48,11 @@ function connectForm(newForm, ...args) {
 
     getError({name, value}) {
       const {errorCache} = this;
-      if (errorCache[name]) {
-        return errorCache[name];
-      }
-      errorCache[name] = getError({name, value});
-      return errorCache[name];
+      return errorCache[name] || (errorCache[name] = getError({name, value}));
+    }
+
+    getErrors(model = this.getModel()) {
+      return this.errorCache = getErrors(model);
     }
 
     getDirt(name) {
@@ -133,6 +138,14 @@ function connectForm(newForm, ...args) {
       }
     }
 
+    ifError(name, component) {
+      const errors = this.errorFor(name);
+      const dirt = this.getDirt(name);
+      if (dirt && errors) {
+        return component({name, errors, errorArray: this.getErrorArray(name)});
+      }
+    }
+
     labelPropsFor(name) {
       return {
         htmlFor: this.getFieldId(name)
@@ -170,17 +183,37 @@ function connectForm(newForm, ...args) {
       return errors.join(' ');
     }
 
-    DumbLabel({name, ...rest}) {
-      //return (<label {...this.labelPropsFor(name)} {...rest}>{name}</label>);
+    componentRequirementMissing(message) {
+      return function() {
+        throw `React Dumb Forms error: ${message}`;
+      }
     }
 
     render() {
 
       const {model, ...rest} = this.props;
 
+      const {errorFor, getDirt, ifError, formProps, propsFor, labelPropsFor} = this;
+
+      const IfError = DefaultComponent
+          ? ifErrorGenerator({errorFor, getDirt}, {DefaultComponent})
+          : this.componentRequirementMissing('You need to pass in option `DefaultComponent`');
+
+      const DumbLabel = LabelComponent
+          ? dumbLabelGenerator({errorFor, getDirt}, {LabelComponent, ErrorComponent})
+          : this.componentRequirementMissing('You need to pass in option `LabelComponent` and `ErrorComponent`');
+
       return React.createElement(newForm,
-        {DumbLabel:this.DumbLabel, formProps: this.formProps, propsFor:this.propsFor,
-          errorFor: this.errorFor, model, ...rest});
+        {
+          DumbLabel,
+          IfError,
+          errorFor,
+          ifError,
+          formProps,
+          propsFor,
+          labelPropsFor,
+          model, ...rest
+        });
     }
   }
   return BoundForm;

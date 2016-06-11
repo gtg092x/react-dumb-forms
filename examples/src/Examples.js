@@ -1,7 +1,8 @@
 import React from 'react';
 import { createHistory } from 'history';
 
-import forms from './forms';
+import containers from './containers';
+import classNames from 'classnames';
 
 const history = createHistory();
 
@@ -38,14 +39,14 @@ export default class Examples extends React.Component {
     const { selected } = this.state;
 
     return (
-      <div className="NavBar-links">
+      <div className="nav navbar-nav">
         {
-          Object.keys(forms).map(exampleName => {
+          Object.keys(containers).map(exampleName => {
             return (
               <a href={`#${exampleName}`} key={ exampleName }
-                className={ selected === exampleName ? 'selected' : '' }
+                className={ classNames(selected === exampleName ? 'selected' : '', 'nav-item nav-link') }
               >
-                { forms[exampleName].title }
+                { containers[exampleName].title }
               </a>
             );
           })
@@ -56,31 +57,48 @@ export default class Examples extends React.Component {
 
   render() {
     const { selected } = this.state;
-    const { Component, title, description } = forms[selected];
+    const { Component, containerName, formName, title, description } = containers[selected];
 
     return (
-      <div>
-        <div>
-          <div className="NavBar">
-            <div className="NavBar-wrapper">
-              { this.renderNavBarExamples() }
-            </div>
+      <div className="app">
+        <nav className="navbar navbar-dark bg-inverse">
+          <div className="navbar-wrapper container">
+            { this.renderNavBarExamples() }
           </div>
-
-          <div className="Examples">
+        </nav>
+        <div className="layout container">
+          <div className="examples">
             <h2> { title } </h2>
-            <p dangerouslySetInnerHTML={{ __html: description }} />
-            <div className="Example">
-              <div className="Example-Result">
-                <Component />
+            <p className="page-description" dangerouslySetInnerHTML={{ __html: description }} />
+            <div className="example">
+              <div className="card example-container">
+
+                <div className="card-block">
+                  <Component />
+                </div>
               </div>
-              <div className="Example-Code">
+
+              <div className="example-code">
+                <h3>Container Code</h3>
                 <pre>
-                  <code className="language-jsx">
-                    { require('!raw!./forms/' + '/' + Component.name + '.js') }
+                  <code className="language-jsx code">
+                    { require(`!raw!./containers/${containerName}.js`) }
                   </code>
                 </pre>
               </div>
+
+              <div className="example-code">
+                <h3>Form Code</h3>
+                <pre>
+                  <code className="language-jsx code">
+                    { require(`!raw!./forms/${formName}.js`) }
+                  </code>
+                </pre>
+              </div>
+
+
+
+
             </div>
           </div>
 

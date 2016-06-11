@@ -5,17 +5,14 @@ Functional forms powered by [React][].
 
 ## Installation
 
-To use version documented here you need to install `beta` tag from npm:
-
-    % npm install react-forms@beta
+    % npm install react-dumb-forms
 
 ## Usage
 
-React Forms doesn't provide any `<Form />` component implementation, instead it
-provides utilities which make implementing form components an easy task.
+###React Dumb Forms is a toolset for building simple, deterministic forms
 
-This is the example where form value is managed as a part of local component
-state. Some might put form value in a Flux/Redux store instead.
+Getting tired of managing custom re-implementations of every kind of input? Yeah, me too. With React Dumb Forms, you can use every input already created by Facebook and every custom input widget that implements `onChange` and `onBlur` - hell, we'll also support `onChangeText` (for you React Native heroes).
+
 
 ```js
 import React from 'react'

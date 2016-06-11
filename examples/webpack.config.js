@@ -34,7 +34,7 @@ module.exports = {
         path.join(__dirname, '../dist')],
       loaders: ['babel'],
     },
-    // { test: /\.css$/, loader: 'style!css?sourceMap' },
+    { test: /\.css$/, loader: 'style-loader!css-loader' },
     { test: /\.json$/, loaders: ['json'] },
     ],
   },
