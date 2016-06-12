@@ -1,7 +1,7 @@
 {
-  "name": "react-forms-examples",
+  "name": "react-dumb-forms-web-examples",
   "version": "1.0.0",
-  "description": "example app for react-forms",
+  "description": "example web app for react-dumb-forms",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

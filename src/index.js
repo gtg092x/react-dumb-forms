@@ -2,6 +2,13 @@ import React from 'react';
 import ifErrorGenerator from './components/ifErrorGenerator';
 import dumbLabelGenerator from './components/dumbLabelGenerator';
 import _ from 'lodash';
+import deepEqual from 'deep-equal';
+
+const defaults = {
+  isNewModel() {
+    return true;
+  }
+};
 
 function connectForm(newForm, ...args) {
 
@@ -9,7 +16,7 @@ function connectForm(newForm, ...args) {
     return {...pointer, ...arg};
   }, {});
 
-  const {getError = _.noop, getErrors = _.noop, LabelComponent, ErrorComponent, DefaultComponent} = options;
+  const {getError = _.noop, isNewModel = defaults.isNewModel, getErrors = _.noop, LabelComponent, ErrorComponent, DefaultComponent} = options;
 
   class BoundForm extends React.Component {
     constructor(props) {
@@ -65,16 +72,23 @@ function connectForm(newForm, ...args) {
     }
 
     componentWillReceiveProps(props) {
-      this.errorCache = {};
+
+
       const newModel = this.getModel(props);
       const oldModel = this.getModel(this.props);
-      const {dirt} = this.state;
-      Object.keys(oldModel).forEach(key => {
-        if (newModel[key] !== oldModel[key]) {
-          dirt[key] = false;
-        }
-      });
-      this.setState({dirt});
+
+      if (!deepEqual(newModel, oldModel) && isNewModel(newModel, oldModel)) {
+        // some validations affect field relationships
+        // need to clear errors on every model update
+        this.errorCache = {};
+        const {dirt} = this.state;
+        Object.keys(oldModel).forEach(key => {
+          if (newModel[key] !== oldModel[key]) {
+            dirt[key] = false;
+          }
+        });
+        this.setState({dirt});
+      }
     }
 
     getValue(name, model = this.getModel()) {

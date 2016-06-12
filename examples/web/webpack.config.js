@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const src = path.join(__dirname, '..', 'src');
+const src = path.join(__dirname, '../..', 'src');
 
 module.exports = {
   devtool: 'source-map',
@@ -41,7 +41,6 @@ module.exports = {
 
   resolve: {
     alias: {
-      'react-forms$': src+'/react-forms',
       'react-dumb-forms$': src
     },
   },

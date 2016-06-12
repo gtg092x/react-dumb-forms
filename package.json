@@ -1,15 +1,18 @@
 {
-  "name": "react-forms",
-  "version": "2.0.0-beta12",
-  "description": "Forms library for React",
-  "homepage": "http://prometheusresearch.github.io/react-forms/",
-  "main": "lib/react-forms.js",
+  "name": "react-dumb-forms",
+  "version": "0.0.1",
+  "description": "Deterministic Forms toolset for React",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "make test-cov"
+    "test": "make test-cov",
+    "compile": "babel --optional runtime -d lib/ src/",
+    "prepublish": "npm run compile"
   },
   "babel": {
     "presets": [
-      "prometheusresearch"
+      "es2015",
+      "stage-1",
+      "react"
     ]
   },
   "nyc": {
@@ -21,22 +24,19 @@
       "**/__tests__/fixtures/*.js"
     ]
   },
-  "eslintConfig": {
-    "extends": "prometheusresearch"
-  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/prometheusresearch/react-forms.git"
+    "url": "git://github.com/gtg092x/react-dumb-forms.git"
   },
   "keywords": [
     "forms",
     "react",
     "react-component"
   ],
-  "author": "Prometheus Research",
+  "author": "gtg092x",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/prometheusresearch/react-forms/issues"
+    "url": "https://github.com/gtg092x/react-forms/issues"
   },
   "peerDependencies": {
     "react": "^0.14.0"
@@ -45,7 +45,9 @@
     "babel-cli": "^6.6.5",
     "babel-core": "^6.7.2",
     "babel-loader": "^6.2.4",
-    "babel-preset-prometheusresearch": "^0.1.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-stage-1": "^6.5.0",
     "coveralls": "^2.11.8",
     "eslint": "^2.12.0",
     "eslint-config-airbnb": "^9.0.1",
@@ -65,6 +67,7 @@
   },
   "dependencies": {
     "autobind-decorator": "^1.3.2",
+    "deep-equal": "^1.0.1",
     "empty": "^0.10.1",
     "generate-function": "^2.0.0",
     "generate-object-property": "^1.1.0",

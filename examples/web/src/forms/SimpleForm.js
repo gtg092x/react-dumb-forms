@@ -1,7 +1,9 @@
 import React from 'react';
 import { form, input, button } from 'react-dom';
+import { connectForm } from 'react-dumb-forms';
 
-export default class SimpleForm extends React.Component {
+
+class SimpleForm extends React.Component {
 
   render() {
 
@@ -29,3 +31,28 @@ export default class SimpleForm extends React.Component {
     );
   }
 }
+
+const validator = {
+    getError({name, value}) {
+        // replace with schema work
+        if (name === 'firstName' && !value) {
+            return `First name is required`;
+        }
+        if (name === 'lastName' && value === 'Doe') {
+            return `Last name cannot be Doe`;
+        }
+    },
+    getErrors(model) {
+        // replace with schema work
+        return Object.keys(model).reduce((pointer, key) => {
+            const error = this.getError({name: key, value: model[key]});
+            if (error && error.length) {
+                pointer[key] = error;
+            }
+            return pointer;
+        }, {});
+    }
+};
+
+
+export default connectForm(SimpleForm, validator);

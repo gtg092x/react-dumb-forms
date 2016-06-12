@@ -77,28 +77,24 @@ export default class Examples extends React.Component {
                   <Component />
                 </div>
               </div>
-
-              <div className="example-code">
-                <h3>Container Code</h3>
-                <pre>
-                  <code className="language-jsx code">
-                    { require(`!raw!./containers/${containerName}.js`) }
-                  </code>
-                </pre>
+              <div className="row">
+                <div className="example-code col-xs-12">
+                  <h3>Form Code</h3>
+                  <pre>
+                    <code className="language-jsx code">
+                      { require(`!raw!./forms/${formName}.js`) }
+                    </code>
+                  </pre>
+                </div>
+                <div className="example-code col-xs-12">
+                  <h3>Container Code</h3>
+                  <pre>
+                    <code className="language-jsx code">
+                      { require(`!raw!./containers/${containerName}.js`) }
+                    </code>
+                  </pre>
+                </div>
               </div>
-
-              <div className="example-code">
-                <h3>Form Code</h3>
-                <pre>
-                  <code className="language-jsx code">
-                    { require(`!raw!./forms/${formName}.js`) }
-                  </code>
-                </pre>
-              </div>
-
-
-
-
             </div>
           </div>
 
