@@ -7,6 +7,11 @@
   },
   "dependencies": {
     "react": "^15.1.0",
+    "react-dumb-forms": "^0.0.1",
     "react-native": "0.27.2"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-do-expressions": "^6.8.0",
+    "babel-plugin-transform-function-bind": "^6.8.0"
   }
 }

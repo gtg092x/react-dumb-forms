@@ -3,11 +3,7 @@ import { form, input, button } from 'react-dom';
 import { connectForm } from 'react-dumb-forms';
 
 
-class SimpleForm extends React.Component {
-
-  render() {
-
-    const {formProps, propsFor, labelPropsFor, errorFor, ifError} = this.props;
+function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 
     return (
       <form {...formProps()}>
@@ -29,7 +25,6 @@ class SimpleForm extends React.Component {
         <button className="btn btn-success" type="submit">Submit</button>
       </form>
     );
-  }
 }
 
 const validator = {
@@ -45,7 +40,7 @@ const validator = {
     getErrors(model) {
         // replace with schema work
         return Object.keys(model).reduce((pointer, key) => {
-            const error = this.getError({name: key, value: model[key]});
+            const error = validator.getError({name: key, value: model[key]});
             if (error && error.length) {
                 pointer[key] = error;
             }
