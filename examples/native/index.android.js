@@ -12,6 +12,8 @@ import {
   View
 } from 'react-native';
 
+import SimpleForm from './src/containers/SimpleContainer';
+
 class DumbFormsNativeExamples extends Component {
   render() {
     return (
@@ -19,12 +21,7 @@ class DumbFormsNativeExamples extends Component {
         <Text style={styles.welcome}>
           Welcome to React Native!
         </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Shake or press menu button for dev menu
-        </Text>
+        <SimpleForm />
       </View>
     );
   }

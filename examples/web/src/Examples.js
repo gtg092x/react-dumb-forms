@@ -57,7 +57,7 @@ export default class Examples extends React.Component {
 
   render() {
     const { selected } = this.state;
-    const { Component, containerName, formName, title, description } = containers[selected];
+    const { Component, FormComponent, containerName, formName, title, description, props } = containers[selected];
 
     return (
       <div className="app">
@@ -74,7 +74,7 @@ export default class Examples extends React.Component {
               <div className="card example-container">
 
                 <div className="card-block">
-                  <Component />
+                  <Component Form={FormComponent} {...props} />
                 </div>
               </div>
               <div className="row">

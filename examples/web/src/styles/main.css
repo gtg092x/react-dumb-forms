@@ -58,6 +58,7 @@ pre {
 	border: solid 2px rgba(215, 215, 215, .27);
 	background-color: #efefef;
 	padding: 24px;
+	white-space: pre-wrap;
 }
 
 .has-error {

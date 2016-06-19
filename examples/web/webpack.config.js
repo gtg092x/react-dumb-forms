@@ -31,7 +31,7 @@ module.exports = {
     loaders: [{
       test: /\.js(x)?$/,
       include: [src, path.join(__dirname, './src'),
-        path.join(__dirname, '../dist')],
+        path.join(__dirname, '../src')],
       loaders: ['babel'],
     },
     { test: /\.css$/, loader: 'style-loader!css-loader' },
@@ -41,7 +41,7 @@ module.exports = {
 
   resolve: {
     alias: {
-      'react-dumb-forms$': src
+      'react-dumb-forms$': path.join(src, 'react-dumb-forms')
     },
   },
 

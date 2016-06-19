@@ -7,11 +7,21 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-1",
+      "stage-2",
+      "react"
+    ]
+  },
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "babel-preset-stage-2": "^6.5.0",
     "css-loader": "^0.23.1",
     "raw-loader": "^0.5.1",
+    "style-loader": "^0.13.1",
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {

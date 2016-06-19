@@ -1,19 +1,24 @@
 import React from 'react';
 import ModelViewer from '../components/ModelViewer'
-import SimpleForm from '../forms/SimpleForm'
 import {div, h3, span} from 'react-dom';
 
 import classNames from 'classnames';
 
-export default class SimpleContainer extends React.Component {
+export default class ModelContainer extends React.Component {
     constructor(props) {
         super(props);
 
         this.onChange = this.onChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+
         this.state = {
-            model: {firstName: 'John', lastName: 'Doe'}
+            model: props.model
         };
+    }
+    componentWillReceiveProps({model}) {
+        if (model !== undefined) {
+            this.setState({model});
+        }
     }
 
     onChange({name, value}) {
@@ -26,11 +31,6 @@ export default class SimpleContainer extends React.Component {
     }
     onSubmit(model) {
         this.setState({model});
-        setTimeout(() => {
-            this.setState({errors: {
-                firstName: 'First name is already taken'
-            }});
-        }, 1000);
     }
     onFocus({name, value}) {
 
@@ -38,12 +38,12 @@ export default class SimpleContainer extends React.Component {
 
     render() {
         const {model, errors, submitted} = this.state;
-
+        const {Form} = this.props;
         return (
             <div className="row">
-                <div className="col-sm-8 container-group">
+                <div className="col-sm-6 container-group">
                     <h3>Form</h3>
-                    <SimpleForm
+                    <Form
                         errors={errors}
                         model={model}
                         onChange={this.onChange}
@@ -53,7 +53,7 @@ export default class SimpleContainer extends React.Component {
                     />
                     {submitted ? (<span>submitted</span>) : null}
                 </div>
-                <ModelViewer className="col-sm-4 container-group" model={model} />
+                <ModelViewer className="col-sm-6 container-group" model={model} />
             </div>
         );
     }

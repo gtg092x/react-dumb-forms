@@ -1,4 +1,4 @@
-import { connectForm } from '../dev/src';
+import { connectForm } from 'react-dumb-forms';
 
 import React, { Component } from 'react';
 import {
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
 });
 
 function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
+
     return (
         <View style={styles.wrapper}>
             <Text>

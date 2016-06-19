@@ -1,8 +1,12 @@
 import React from 'react';
 import ifErrorGenerator from './components/ifErrorGenerator';
 import dumbLabelGenerator from './components/dumbLabelGenerator';
-import _ from 'lodash';
+import {getPreset} from './change-presets';
 import deepEqual from 'deep-equal';
+import _ from 'lodash';
+import dot from 'dot-object';
+
+const ENTER_KEY = 13;
 
 const defaults = {
   isNewModel() {
@@ -11,10 +15,16 @@ const defaults = {
 };
 
 function getValueFromEvent(event) {
-  if (event.nativeEvent){
-    return event.nativeEvent.text;
-  } else if (event.target) {
+  if (event.nativeEvent !== undefined && (event.nativeEvent.value !== undefined || event.nativeEvent.text !== undefined)){
+    return event.nativeEvent.text !== undefined ? event.nativeEvent.text : event.nativeEvent.value;
+  } else if (event.target !== undefined) {
     return event.target.value;
+  } else if (event.currentTarget !== undefined) {
+    return event.currentTarget.value;
+  } else if (event.value !== undefined) {
+    return event.value;
+  } else {
+    return event;
   }
 }
 
@@ -39,9 +49,13 @@ function connectForm(newForm, ...args) {
       this.onSubmit = this.onSubmit.bind(this);
       this.onSubmitEditing = this.onSubmitEditing.bind(this);
       this.onChange = this.onChange.bind(this);
+      this.onSelect = this.onSelect.bind(this);
+      this.onKeyDown = this.onKeyDown.bind(this);
       this.onFocus = this.onFocus.bind(this);
       this.formProps = this.formProps.bind(this);
       this.propsFor = this.propsFor.bind(this);
+      this.basePropsFor = this.basePropsFor.bind(this);
+      this.checkedPropsFor = this.checkedPropsFor.bind(this);
       this.componentRequirementMissing = this.componentRequirementMissing.bind(this);
       this.errorFor = this.errorFor.bind(this);
       this.labelPropsFor = this.labelPropsFor.bind(this);
@@ -77,7 +91,7 @@ function connectForm(newForm, ...args) {
     }
 
     getModel(props = this.props) {
-      return {...props.model};
+      return {...dot.dot(props.model)};
     }
 
     componentWillReceiveProps(props) {
@@ -101,7 +115,11 @@ function connectForm(newForm, ...args) {
     }
 
     getValue(name, model = this.getModel()) {
-      return model[name];
+      const value = model[name];
+      if (value === undefined) {
+        console.warn(`Warning, property ${name} not found in model:`, model);
+      }
+      return value;
     }
 
     onBlur(name, e) {
@@ -117,6 +135,9 @@ function connectForm(newForm, ...args) {
       this.props.onChange({name, value});
     }
     onChangeText(name, value) {
+      this.props.onChange({name, value});
+    }
+    onSelect(name, value) {
       this.props.onChange({name, value});
     }
 
@@ -152,23 +173,105 @@ function connectForm(newForm, ...args) {
 
     }
 
+    onKeyDown(name, event) {
+
+      if (event.which === ENTER_KEY && event.metaKey) {
+        this.onSubmit(event, name);
+        event.preventDefault();
+        return false;
+      }
+    }
+
     onSubmitEditing(name, e) {
       const value = getValueFromEvent(e);
       this.onSubmit(e, name);
     }
 
-    propsFor(name) {
-      return {
+    basePropsFor(name) {
+      const props = {
         onBlur: this.onBlur.bind(this, name),
         onFocus: this.onFocus.bind(this, name),
-        onChange: this.onChange.bind(this, name),
-        onChangeText: this.onChangeText.bind(this, name),
+        name
+      };
+
+      return props;
+    }
+
+    checkedPropsFor(name, value) {
+
+      const fullName = value === undefined
+        ? name
+        : `${name}_${value}`;
+
+      const onChange = (e) => {
+        const target = e.target || e;
+
+        const {checked, value: targetValue} = target;
+        if (value === undefined) {
+          this.onChange(name, {value: checked});
+        } else if (value === targetValue && checked) {
+          this.onChange(name, {value});
+        }
+      };
+
+      return {
+        onChange,
+        ...this.basePropsFor(name),
+        ref: this.registerRef.bind(this, fullName),
+        checked: value === undefined ? this.getValue(name) === true : value === this.getValue(name),
+        id: this.getFieldId(fullName),
+        value
+      };
+    }
+
+    propsFor(name, onChangeHandler, onChangeHandlerFn) {
+      const props = {
+        ...this.basePropsFor(name, onChangeHandler, onChangeHandlerFn),
+        value: this.getValue(name),
+        onKeyDown: this.onKeyDown.bind(this, name),
         onSubmitEditing: this.onSubmitEditing.bind(this, name),
-        name,
         ref: this.registerRef.bind(this, name),
-        id: this.getFieldId(name),
-        value: this.getValue(name)
+        id: this.getFieldId(name)
+      };
+
+      let changeHandlerName = 'onChange';
+      const onChangeBase = this.onChange.bind(this, name);
+      let onChange = onChangeBase;
+
+      if (onChangeHandler) {
+        if (onChangeHandler.name) {
+          changeHandlerName = onChangeHandler.name;
+          onChange = function (...args) {
+            const value = onChangeHandler.apply(this, args);
+            onChangeBase({value});
+          }
+        } else if (_.isPlainObject(onChangeHandler)) {
+          [changeHandlerName] = Object.keys(onChangeHandler);
+          onChange = function (...args) {
+            const value = onChangeHandler[onChangeHandlerName].apply(this, args);
+            onChangeBase({value});
+          }
+        } else if (_.isString(onChangeHandler)) {
+          if (onChangeHandlerFn !== undefined) {
+            changeHandlerName = onChangeHandler;
+            onChange = function (...args) {
+              const value = onChangeHandlerFn.apply(this, args);
+              onChangeBase({value});
+            }
+          } else {
+            changeHandlerName = onChangeHandler;
+            const fn = getPreset(changeHandlerName);
+            onChange = function (...args) {
+              const value = fn.apply(this, args);
+              onChangeBase({value});
+            }
+          }
+
+        }
       }
+
+      props[changeHandlerName] = onChange;
+      return props;
     }
 
     ifError(name, component) {
@@ -179,7 +282,8 @@ function connectForm(newForm, ...args) {
       }
     }
 
-    labelPropsFor(name) {
+    labelPropsFor(...nameParts) {
+      const name = nameParts.join('_');
       return {
         htmlFor: this.getFieldId(name)
       };
@@ -226,7 +330,7 @@ function connectForm(newForm, ...args) {
 
       const {model, ...rest} = this.props;
 
-      const {errorFor, getDirt, ifError, formProps, propsFor, labelPropsFor} = this;
+      const {errorFor, getDirt, ifError, formProps, propsFor, labelPropsFor, checkedPropsFor} = this;
 
       const IfError = DefaultComponent
           ? ifErrorGenerator({errorFor, getDirt}, {DefaultComponent})
@@ -236,15 +340,55 @@ function connectForm(newForm, ...args) {
           ? dumbLabelGenerator({errorFor, getDirt, labelPropsFor}, {LabelComponent, ErrorComponent})
           : this.componentRequirementMissing('You need to pass in option `LabelComponent` and `ErrorComponent`');
 
+      const propExpanders = {
+        errorFor,
+        ifError,
+        formProps,
+        propsFor,
+        checkedPropsFor,
+        labelPropsFor
+      };
+
+      const boundComponents = {
+        DumbLabel,
+        IfError
+      };
+
+      const context = this;
+      function fieldsetPropsFor (namespace) {
+        const namespacedPropExpanders = Object.keys(propExpanders).reduce((pointer, key) => {
+          return {
+            [key](name, ...args) {
+              return propExpanders[key].apply(context, [`${namespace}.${name}`, ...args]);
+            },
+            ...pointer
+          };
+        } , {});
+
+        const namespacedBoundComponents = Object.keys(boundComponents).reduce((pointer, key) => {
+          return {
+            [key]({name, ...rest}, ...args) {
+              return boundComponents[key].apply(context, [{name: `${namespace}.${name}`, ...rest}, ...args]);
+            },
+            ...pointer
+          };
+        } , {});
+
+        return {
+          ...namespacedPropExpanders,
+          ...namespacedBoundComponents,
+          fieldsetPropsFor(subnamespace, ...args) {
+            // Turtles all the way down
+            return fieldsetPropsFor.apply(context, [`${namespace}.${subnamespace}`, ...args]);
+          }
+        };
+      }
+
       return React.createElement(newForm,
         {
-          DumbLabel,
-          IfError,
-          errorFor,
-          ifError,
-          formProps,
-          propsFor,
-          labelPropsFor,
+          ...propExpanders,
+          ...boundComponents,
+          fieldsetPropsFor,
           model, ...rest
         });
     }
