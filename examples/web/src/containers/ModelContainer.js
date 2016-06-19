@@ -41,7 +41,7 @@ export default class ModelContainer extends React.Component {
         const {Form} = this.props;
         return (
             <div className="row">
-                <div className="col-sm-6 container-group">
+                <div className="col-lg-6 container-group">
                     <h3>Form</h3>
                     <Form
                         errors={errors}
@@ -53,7 +53,7 @@ export default class ModelContainer extends React.Component {
                     />
                     {submitted ? (<span>submitted</span>) : null}
                 </div>
-                <ModelViewer className="col-sm-6 container-group" model={model} />
+                <ModelViewer className="col-lg-6 container-group" model={model} />
             </div>
         );
     }

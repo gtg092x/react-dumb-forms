@@ -1,15 +1,24 @@
 import React from 'react';
-import { form, textarea, button } from 'react-dom';
+import { form, select, option, button } from 'react-dom';
 import { connectForm } from 'react-dumb-forms';
 
-function TextAreaForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
+function CommonComponentForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 
   return (
     <form {...formProps()}>
       {errorFor('*')}
 
+      <label className="form-group" {...labelPropsFor('bestCaCity')}>
+        Best City in California
+        <select className="c-select form-control" {...propsFor('bestCaCity')}>
+          <option value="LA">Los Angeles</option>
+          <option value="SF">San Francisco</option>
+          <option value="SD">San Diego</option>
+        </select>
+      </label>
+
       <label className="form-group" {...labelPropsFor('aboutMe')}>
-        First Name
+        About Me
 
         {ifError('aboutMe', function({errors}) {
           return <span className="has-error">{errors}</span>;
@@ -17,6 +26,7 @@ function TextAreaForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
         <textarea className="form-control" {...propsFor('aboutMe')} />
 
       </label>
+
       <button className="btn btn-success" type="submit">Submit</button>
     </form>
   );
@@ -25,9 +35,8 @@ function TextAreaForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 const validator = {
   getError({name, value}) {
     // replace with schema work
-    if (name === 'aboutMe' && !value) {
-      return `About me is required`;
-    }
+    // TODO
+    return false;
   },
   getErrors(model) {
     // replace with schema work
@@ -42,4 +51,4 @@ const validator = {
 };
 
 
-export default connectForm(TextAreaForm, validator);
+export default connectForm(CommonComponentForm, validator);

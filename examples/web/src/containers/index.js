@@ -1,9 +1,9 @@
 import ModelContainer from './ModelContainer';
 import SimpleForm from '../forms/SimpleForm'
 import CustomInputForm from '../forms/CustomInputForm';
-import TextAreaForm from '../forms/TextAreaForm';
 import FieldsetForm from '../forms/FieldsetForm';
 import RadioForm from '../forms/RadioForm';
+import CommonComponentForm from '../forms/CommonComponentForm';
 
 export default {
     simple: {
@@ -25,18 +25,7 @@ export default {
         containerName: 'ModelContainer',
         formName: 'CustomInputForm',
         props: {
-            model: {firstName: 'John'}
-        }
-    },
-    textArea: {
-        title: 'Text Area',
-        description: 'Using a text area.',
-        Component: ModelContainer,
-        FormComponent: TextAreaForm,
-        containerName: 'ModelContainer',
-        formName: 'TextAreaForm',
-        props: {
-            model: {aboutMe: 'Hey! Nice to meet you.'}
+            model: {firstName: 'John', myBirthday: new Date(), favoriteCake: 'Chocolate'}
         }
     },
     fieldset: {
@@ -74,6 +63,20 @@ export default {
             model: {
                 'favoriteColor': 'blue',
                 'isFlake': true
+            }
+        }
+    },
+    common: {
+        title: 'Common Component Form',
+        description: 'Most common components.',
+        Component: ModelContainer,
+        FormComponent: CommonComponentForm,
+        containerName: 'ModelContainer',
+        formName: 'CommonComponentForm',
+        props: {
+            model: {
+                'bestCaCity': 'LA',
+                'aboutMe': ''
             }
         }
     },

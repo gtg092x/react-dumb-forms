@@ -4,7 +4,6 @@ import dumbLabelGenerator from './components/dumbLabelGenerator';
 import {getPreset} from './change-presets';
 import deepEqual from 'deep-equal';
 import _ from 'lodash';
-import dot from 'dot-object';
 
 const ENTER_KEY = 13;
 
@@ -15,13 +14,18 @@ const defaults = {
 };
 
 function getValueFromEvent(event) {
-  if (event.nativeEvent !== undefined && (event.nativeEvent.value !== undefined || event.nativeEvent.text !== undefined)){
+
+  if (_.isArray(event)) {
+    return event.map(getValueFromEvent);
+  }
+
+  if (event && event.nativeEvent !== undefined && (event.nativeEvent.value !== undefined || event.nativeEvent.text !== undefined)){
     return event.nativeEvent.text !== undefined ? event.nativeEvent.text : event.nativeEvent.value;
-  } else if (event.target !== undefined) {
+  } else if (event && event.target !== undefined) {
     return event.target.value;
-  } else if (event.currentTarget !== undefined) {
+  } else if (event && event.currentTarget !== undefined) {
     return event.currentTarget.value;
-  } else if (event.value !== undefined) {
+  } else if (event && event.value !== undefined) {
     return event.value;
   } else {
     return event;
@@ -98,7 +102,7 @@ function connectForm(newForm, ...args) {
     }
 
     getModel(props = this.props) {
-      return {...dot.dot(props.model)};
+      return {...props.model};
     }
 
     componentWillReceiveProps(props) {
@@ -232,9 +236,20 @@ function connectForm(newForm, ...args) {
       };
     }
 
-    propsFor(name, onChangeHandler, onChangeHandlerFn) {
+    propsFor(name, _propsTransform = _.identity, _options = {}) {
+
+      const options = _.isPlainObject(_propsTransform)
+        ? _propsTransform
+        : _options;
+
+      const propsTransform = _.isPlainObject(_propsTransform)
+        ? _.identity
+        : _propsTransform;
+
+      const {changeTransform} = options;
+
       const props = {
-        ...this.basePropsFor(name, onChangeHandler, onChangeHandlerFn),
+        ...this.basePropsFor(name),
         value: this.getValue(name),
         onKeyDown: this.onKeyDown.bind(this, name),
         onSubmitEditing: this.onSubmitEditing.bind(this, name),
@@ -246,39 +261,31 @@ function connectForm(newForm, ...args) {
       const onChangeBase = this.onChange.bind(this, name);
       let onChange = onChangeBase;
 
-      if (onChangeHandler) {
-        if (_.isString(onChangeHandler)) {
-          if (onChangeHandlerFn !== undefined) {
-            changeHandlerName = onChangeHandler;
-            onChange = function (...args) {
-              const value = onChangeHandlerFn.apply(this, args);
-              onChangeBase({value});
-            }
-          } else {
-            changeHandlerName = onChangeHandler;
-            const fn = getPreset(changeHandlerName);
-            onChange = function (...args) {
-              const value = fn.apply(this, args);
-              onChangeBase({value});
-            }
-          }
-        } else if (_.isPlainObject(onChangeHandler)) {
-          [changeHandlerName] = Object.keys(onChangeHandler);
+      if (changeTransform) {
+        if (_.isString(changeTransform)) {
+          changeHandlerName = changeTransform;
+          const fn = getPreset(changeHandlerName);
           onChange = function (...args) {
-            const value = onChangeHandler[changeHandlerName].apply(this, args);
+            const value = fn.apply(this, args);
             onChangeBase({value});
           }
-        } else if (onChangeHandler.name) {
-          changeHandlerName = onChangeHandler.name;
+        } else if (_.isPlainObject(changeTransform)) {
+          [changeHandlerName] = Object.keys(changeTransform);
           onChange = function (...args) {
-            const value = onChangeHandler.apply(this, args);
+            const value = changeTransform[changeHandlerName].apply(this, args);
+            onChangeBase({value});
+          }
+        } else if (changeTransform.name) {
+          changeHandlerName = changeTransform.name;
+          onChange = function (...args) {
+            const value = changeTransform.apply(this, args);
             onChangeBase({value});
           }
         }
       }
 
       props[changeHandlerName] = onChange;
-      return props;
+      return propsTransform(props);
     }
 
     ifError(name, component) {
@@ -337,7 +344,7 @@ function connectForm(newForm, ...args) {
 
       const {model, ...rest} = this.props;
 
-      const {errorFor, getDirt, ifError, formProps, propsFor, labelPropsFor, checkedPropsFor} = this;
+      const {errorFor, getDirt, ifError, formProps, propsFor, labelPropsFor, checkedPropsFor, getValue, onChange} = this;
 
       const IfError = DefaultComponent
           ? ifErrorGenerator({errorFor, getDirt}, {DefaultComponent})
@@ -351,6 +358,8 @@ function connectForm(newForm, ...args) {
         errorFor,
         ifError,
         formProps,
+        getValue,
+        onChange,
         propsFor,
         checkedPropsFor,
         labelPropsFor
