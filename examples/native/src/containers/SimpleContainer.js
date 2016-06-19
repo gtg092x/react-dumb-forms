@@ -6,6 +6,12 @@ import {
 } from 'react-native';
 import SimpleForm from '../forms/SimpleForm';
 
+const styles = StyleSheet.create({
+    default: {
+        marginTop: 15,
+    }
+});
+
 export default class SimpleContainer extends React.Component {
 
     constructor() {
@@ -41,7 +47,7 @@ export default class SimpleContainer extends React.Component {
         const {model, errors} = this.state;
 
         return (
-            <View>
+            <View style={styles.default}>
                 <SimpleForm
                     errors={errors}
                     model={model}
@@ -50,7 +56,7 @@ export default class SimpleContainer extends React.Component {
                     onFocus={this.onFocus}
                     onBlur={this.onBlur}
                 />
-                <Text>{JSON.stringify(model, null, 4)}</Text>
+                <Text style={styles.default}>{JSON.stringify(model, null, 4)}</Text>
             </View>
         );
     }

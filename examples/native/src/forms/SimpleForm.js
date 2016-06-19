@@ -13,15 +13,17 @@ const styles = StyleSheet.create({
         paddingBottom: 300,
     },
     default: {
-        height: 26,
-        borderWidth: 0.5,
+        height: 39,
+        borderWidth: .5,
         borderColor: '#0f0f0f',
         flex: 1,
+        lineHeight: 28,
+        marginTop: 5,
         fontSize: 13,
+        textAlignVertical: 'center',
         padding: 4,
     },
     wrapper: {
-
         width: 200
     }
 });

@@ -30,7 +30,8 @@ class DumbFormsNativeExamples extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 100,
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },

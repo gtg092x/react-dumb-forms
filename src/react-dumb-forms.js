@@ -34,7 +34,14 @@ function connectForm(newForm, ...args) {
     return {...pointer, ...arg};
   }, {});
 
-  const {getError = _.noop, isNewModel = defaults.isNewModel, getErrors = _.noop, LabelComponent, ErrorComponent, DefaultComponent} = options;
+  const {
+    getError = _.noop,
+    getErrors = _.noop,
+    isNewModel = defaults.isNewModel,
+    LabelComponent,
+    ErrorComponent,
+    DefaultComponent
+  } = options;
 
   class BoundForm extends React.Component {
     constructor(props) {
@@ -69,7 +76,7 @@ function connectForm(newForm, ...args) {
     }
 
     genId() {
-      return `form_${Math.ceil(Math.random() * 100000)}`;
+      return `form_${Math.ceil(Math.random() * 1000000)}`;
     }
 
     getFieldId(name = '*') {
@@ -164,6 +171,7 @@ function connectForm(newForm, ...args) {
     formProps() {
       return {
         onSubmit: this.onSubmit,
+        id: this.state.id,
         type: 'post',
         action: '#'
       };
@@ -239,19 +247,7 @@ function connectForm(newForm, ...args) {
       let onChange = onChangeBase;
 
       if (onChangeHandler) {
-        if (onChangeHandler.name) {
-          changeHandlerName = onChangeHandler.name;
-          onChange = function (...args) {
-            const value = onChangeHandler.apply(this, args);
-            onChangeBase({value});
-          }
-        } else if (_.isPlainObject(onChangeHandler)) {
-          [changeHandlerName] = Object.keys(onChangeHandler);
-          onChange = function (...args) {
-            const value = onChangeHandler[onChangeHandlerName].apply(this, args);
-            onChangeBase({value});
-          }
-        } else if (_.isString(onChangeHandler)) {
+        if (_.isString(onChangeHandler)) {
           if (onChangeHandlerFn !== undefined) {
             changeHandlerName = onChangeHandler;
             onChange = function (...args) {
@@ -266,7 +262,18 @@ function connectForm(newForm, ...args) {
               onChangeBase({value});
             }
           }
-
+        } else if (_.isPlainObject(onChangeHandler)) {
+          [changeHandlerName] = Object.keys(onChangeHandler);
+          onChange = function (...args) {
+            const value = onChangeHandler[changeHandlerName].apply(this, args);
+            onChangeBase({value});
+          }
+        } else if (onChangeHandler.name) {
+          changeHandlerName = onChangeHandler.name;
+          onChange = function (...args) {
+            const value = onChangeHandler.apply(this, args);
+            onChangeBase({value});
+          }
         }
       }
 
@@ -384,8 +391,13 @@ function connectForm(newForm, ...args) {
         };
       }
 
+      const events = {
+        onSubmit: this.onSubmit
+      };
+
       return React.createElement(newForm,
         {
+          ...events,
           ...propExpanders,
           ...boundComponents,
           fieldsetPropsFor,
