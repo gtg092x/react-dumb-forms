@@ -35,7 +35,7 @@ function AddressFieldset({propsFor, labelPropsFor, children, checkedPropsFor, fi
       <PhoneFieldset {...fieldsetPropsFor('phone')}>
         Phone
       </PhoneFieldset>
-      <PhoneFieldset {...fieldsetPropsFor('phone')}>
+      <PhoneFieldset {...fieldsetPropsFor('fax')}>
         Fax
       </PhoneFieldset>
     </fieldset>

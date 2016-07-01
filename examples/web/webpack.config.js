@@ -8,6 +8,7 @@ module.exports = {
 
   entry: {
     'main': [
+      'babel-polyfill',
       path.join(__dirname, 'src/main.js'),
     ],
   },

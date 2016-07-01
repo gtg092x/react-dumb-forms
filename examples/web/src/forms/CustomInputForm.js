@@ -8,18 +8,26 @@ import 'react-select/dist/react-select.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
 
-function MyInput({onMyUpdate, ...rest}) {
+function MyUppercaseInput({onUppercaseChange, value, ...rest}) {
   const onChange = (e) => {
-    onMyUpdate({newValue: e.target.value});
+    onUppercaseChange({newValue: e.target.value.toUpperCase()});
   };
-  return <input onChange={onChange} {...rest} />
+  return <input onChange={onChange} value={value.toUpperCase()} {...rest} />
 }
 
-function onMyUpdate({newValue}) {
-  return newValue;
+function MyUppercaseInputResolver({onChange, ...rest}) {
+
+  const onUppercaseChange = ({newValue}) => {
+    onChange(newValue);
+  };
+
+  return {
+    onUppercaseChange,
+    ...rest
+  };
 }
 
-function datePickerTransform({value, ...rest}) {
+function DatePickerResolver({value, ...rest}) {
   return {
     selected: moment(value),
     ...rest
@@ -28,30 +36,30 @@ function datePickerTransform({value, ...rest}) {
 
 const cakes = ['Chocolate', 'Vanilla', 'Coconut'].map(cake => ({value: cake, label: cake}));
 
-function CustomInputForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
+function CustomInputForm({formProps, propsFor, labelPropsFor, errorFor, ifError, dumbProps}) {
 
   return (
     <form {...formProps()}>
       {errorFor('*')}
 
       <label className="form-group" {...labelPropsFor('firstName')}>
-        First Name
+        Uppercase First Name
         {ifError('firstName', function ({errors}) {
           return <span className="has-error">{errors}</span>;
         })}
-        <MyInput className="form-control" {...propsFor('firstName', {changeTransform: onMyUpdate})} />
+        <MyUppercaseInput className="form-control" {...propsFor('firstName', MyUppercaseInputResolver)} />
       </label>
 
       <label className="form-group" {...labelPropsFor('myBirthday')}>
         Date Picker
         <span className="form-control">
-          <DatePicker className="form-control" {...propsFor('myBirthday', datePickerTransform)} />
+          <DatePicker className="form-control" {...propsFor('myBirthday', DatePickerResolver)} />
         </span>
       </label>
 
       <label className="form-group" {...labelPropsFor('favoriteCake')}>
         React Select
-        <Select multi={true} className="form-control" options={cakes} {...propsFor('favoriteCake')} />
+        <Select multi={true} className="form-control" options={cakes} {...propsFor('favoriteCake', 'ReactSelect')} />
       </label>
 
 

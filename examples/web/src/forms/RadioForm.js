@@ -2,7 +2,7 @@ import React from 'react';
 import { form, input, button } from 'react-dom';
 import { connectForm } from 'react-dumb-forms';
 
-function RadioForm({formProps, checkedPropsFor, labelPropsFor, errorFor, ifError}) {
+function RadioForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 
   return (
     <form {...formProps()}>
@@ -10,19 +10,23 @@ function RadioForm({formProps, checkedPropsFor, labelPropsFor, errorFor, ifError
 
       <div className="form-group">
         <label className="radio-inline" {...labelPropsFor('favoriteColor', 'red')}>
-          <input type="radio" {...checkedPropsFor('favoriteColor', 'red')} />
+          <input type="radio" {...propsFor({'favoriteColor': 'red'})} />
           Red
         </label>
         <label className="radio-inline" {...labelPropsFor('favoriteColor', 'blue')}>
-          <input type="radio" {...checkedPropsFor('favoriteColor', 'blue')} />
+          <input type="radio" {...propsFor({'favoriteColor': 'blue'})} />
           Blue
+        </label>
+        <label className="radio-inline" {...labelPropsFor('favoriteColor', 'green')}>
+          <input type="radio" {...propsFor({'favoriteColor': 'green'})} />
+          Green
         </label>
       </div>
 
 
       <div className="form-group">
         <label className="checkbox-inline" {...labelPropsFor('isFlake')}>
-          <input type="checkbox" {...checkedPropsFor('isFlake')} />
+          <input type="checkbox" {...propsFor({'isFlake': true})} />
           I change my favorite color sometimes
         </label>
       </div>

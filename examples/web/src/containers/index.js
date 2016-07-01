@@ -7,8 +7,8 @@ import CommonComponentForm from '../forms/CommonComponentForm';
 
 export default {
     simple: {
-        title: 'Container State',
-        description: 'Data is stored in container state',
+        title: 'Basic Form',
+        description: 'Barebones form',
         Component: ModelContainer,
         FormComponent: SimpleForm,
         containerName: 'ModelContainer',
@@ -25,7 +25,7 @@ export default {
         containerName: 'ModelContainer',
         formName: 'CustomInputForm',
         props: {
-            model: {firstName: 'John', myBirthday: new Date(), favoriteCake: 'Chocolate'}
+            model: {firstName: 'JOHN', myBirthday: new Date(), favoriteCake: 'Chocolate'}
         }
     },
     fieldset: {

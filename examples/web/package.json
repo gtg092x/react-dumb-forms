@@ -18,6 +18,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "babel-polyfill": "^6.9.1",
     "babel-preset-stage-2": "^6.5.0",
     "css-loader": "^0.23.1",
     "raw-loader": "^0.5.1",
