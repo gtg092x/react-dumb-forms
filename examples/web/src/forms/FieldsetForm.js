@@ -18,7 +18,7 @@ function PhoneFieldset({propsFor, labelPropsFor, children}) {
   );
 }
 
-function AddressFieldset({propsFor, labelPropsFor, children, checkedPropsFor, fieldsetPropsFor}) {
+function AddressFieldset({propsFor, labelPropsFor, children, fieldsetPropsFor}) {
   return (
     <fieldset>
       <legend>{children}</legend>
@@ -28,8 +28,18 @@ function AddressFieldset({propsFor, labelPropsFor, children, checkedPropsFor, fi
       </label>
       <div className="form-group">
         <label className="checkbox-inline" {...labelPropsFor('mail')}>
-          <input type="checkbox" {...checkedPropsFor('mail')} />
+          <input type="checkbox" {...propsFor({'mail': true})} />
           Can receive mail
+        </label>
+      </div>
+      <div className="form-group">
+        <label className="radio-inline" {...labelPropsFor('deliveryMethod', 'snail')}>
+          <input type="radio" {...propsFor({'deliveryMethod': 'snail'})} />
+          Snail Mail
+        </label>
+        <label className="radio-inline" {...labelPropsFor('deliveryMethod', 'email')}>
+          <input type="radio" {...propsFor({'deliveryMethod': 'email'})} />
+          Email
         </label>
       </div>
       <PhoneFieldset {...fieldsetPropsFor('phone')}>

@@ -22,47 +22,24 @@ function genId() {
   return `form_${Math.ceil(Math.random() * 1000000)}`;
 }
 
-function unpackOnValue(onArg) {
-  if (onArg.on) {
-    return onArg;
-  }
-  const [on] = Object.keys(on);
-  const off = on[on];
-  return {on, off};
-}
 
 function unpackNameArgObject(nameArg) {
   const [name] = Object.keys(nameArg);
   const on = nameArg[name];
 
-  if (_.isPlainObject(on)) {
-    return {
-      key: name,
-      ...unpackOnValue(on)
-    };
-  }
-
   return {
     on,
-    off: false,
-    key: name
+    name
   };
 }
 
 function unpackNameArgArray(nameArg) {
-  const [name, on, off] = nameArg;
+  const [name, on] = nameArg;
 
-  if (_.isPlainObject(on)) {
-    return {
-      key: name,
-      ...unpackOnValue(on)
-    };
-  }
 
   return {
     on,
-    off,
-    key: name
+    name
   };
 }
 
@@ -70,9 +47,23 @@ function unpackNameArg(nameArg) {
 
   if (_.isArray(nameArg)) {
     return unpackNameArgArray(nameArg);
+  } else if (_.isPlainObject(nameArg)) {
+    return unpackNameArgObject(nameArg);
+  } else {
+    return {
+      name: nameArg
+    };
   }
-  return unpackNameArgObject(nameArg);
-
 }
 
-export {getValueFromEvent, genId, unpackNameArg};
+function repackNameArg({name, on}) {
+  if (on === undefined) {
+    return name;
+  } else {
+    return {
+      [name]: on
+    };
+  }
+}
+
+export {getValueFromEvent, genId, unpackNameArg, repackNameArg};

@@ -3,7 +3,7 @@ import ifErrorGenerator from './components/ifErrorGenerator';
 import dumbLabelGenerator from './components/dumbLabelGenerator';
 import {getPreset} from './presets';
 import defaults from './defaults'
-import {genId, unpackNameArg} from './lib';
+import {genId, unpackNameArg, repackNameArg} from './lib';
 
 import deepEqual from 'deep-equal';
 import _ from 'lodash';
@@ -55,6 +55,7 @@ function connectForm(newForm, ...args) {
 
       /* utils */
       this.componentRequirementMissing = this.componentRequirementMissing.bind(this);
+      this.fieldState = this.fieldState.bind(this);
 
       this.errorCache = {};
       this.state = {dirt: {}, id: props.id || genId()};
@@ -206,19 +207,44 @@ function connectForm(newForm, ...args) {
     }
     /* End Core Form Methods */
 
-    propsFor(name, presetArg) {
+    fieldState(name, value) {
+      const {disabled: disabledProp = {}, readonly: readonlyProp = {}} = this.props;
 
-      if (_.isPlainObject(name) || _.isArray(name)) {
-        const {on, off, key} = unpackNameArg(name);
-        if (_.isBoolean(on) || on === null || on === Boolean) {
-          return this.checkedPropsFor(key);
-        }
-        return this.checkedPropsFor(key, on);
-      }
+      const fullName = value !== undefined && `${name}_${value}`;
+
+      const disabled = !_.isBoolean(disabledProp)
+        ? ((value !== undefined && disabledProp[fullName]) || disabledProp[name] || disabledProp['*'])
+        : disabledProp;
+
+      const readonly = !_.isBoolean(readonlyProp)
+        ? ((value !== undefined && readonlyProp[fullName]) || readonlyProp[name] || readonlyProp['*'])
+        : readonlyProp;
+
+      return {
+        readonly,
+        disabled
+      };
+    }
+
+    propsFor(name, presetArg) {
 
       const preset = _.isFunction(presetArg)
         ? presetArg
         : getPreset(presetArg);
+
+
+      if (_.isPlainObject(name) || _.isArray(name)) {
+
+        const checkedPreset = presetArg === undefined
+          ? getPreset('Checked')
+          : preset;
+
+        const {on, name: key} = unpackNameArg(name);
+        if (_.isBoolean(on) || on === null || on === Boolean) {
+          return this.checkedPropsFor(key, undefined, checkedPreset);
+        }
+        return this.checkedPropsFor(key, on, checkedPreset);
+      }
 
 
       const value = this.getValue(name);
@@ -229,18 +255,19 @@ function connectForm(newForm, ...args) {
         ...this.basePropsFor(name),
         ...afterPreset,
         value,
+        ...this.fieldState(name),
         ref: this.registerRef.bind(this, name),
         id: this.getFieldId(name)
       };
     }
 
-    checkedPropsFor(name, value) {
+    checkedPropsFor(name, value, preset) {
 
       const fullName = value === undefined
         ? name
         : `${name}_${value}`;
 
-      const afterPreset = getPreset('Checked')({...this.basePropsFor(name), onChange: this.onChange.bind(this, name), value});
+      const afterPreset = preset({...this.basePropsFor(name), onChange: this.onChange.bind(this, name), value});
       if (!afterPreset.onChange) {
         console.warn(`Cannot find onChange for field ${name}. This probably won't work. Check your preset Checked.`);
       }
@@ -248,6 +275,7 @@ function connectForm(newForm, ...args) {
       return {
         ...this.basePropsFor(name),
         ...afterPreset,
+        ...this.fieldState(name, value),
         ref: this.registerRef.bind(this, fullName),
         checked: value === undefined ? this.getValue(name) === true : value === this.getValue(name),
         id: this.getFieldId(fullName),
@@ -297,14 +325,15 @@ function connectForm(newForm, ...args) {
         ? dumbLabelGenerator({errorFor, getDirt, labelPropsFor}, {LabelComponent, ErrorComponent})
         : this.componentRequirementMissing('You need to pass in option `LabelComponent` and `ErrorComponent`');
 
-      const propExpanders = {
+      const utilExpanders = {
         errorFor,
         ifError,
         formProps,
-        getValue,
-        onChange,
+        getValue
+      };
+
+      const propExpanders = {
         propsFor,
-        checkedPropsFor,
         labelPropsFor
       };
 
@@ -317,8 +346,20 @@ function connectForm(newForm, ...args) {
       function fieldsetPropsFor (namespace) {
         const namespacedPropExpanders = Object.keys(propExpanders).reduce((pointer, key) => {
           return {
-            [key](name, ...args) {
-              return propExpanders[key].apply(context, [`${namespace}.${name}`, ...args]);
+            [key](nameArg, ...args) {
+              const {name, on} = unpackNameArg(nameArg);
+              const repackedName = repackNameArg({name: `${namespace}.${name}`, on});
+              return propExpanders[key].apply(context, [repackedName, ...args]);
+            },
+            ...pointer
+          };
+        } , {});
+
+        const namespacedUtils = Object.keys(utilExpanders).reduce((pointer, key) => {
+          return {
+            [key](nameArg, ...args) {
+              const {name} = unpackNameArg(nameArg);
+              return utilExpanders[key].apply(context, [`${namespace}.${name}`, ...args]);
             },
             ...pointer
           };
@@ -326,7 +367,8 @@ function connectForm(newForm, ...args) {
 
         const namespacedBoundComponents = Object.keys(boundComponents).reduce((pointer, key) => {
           return {
-            [key]({name, ...rest}, ...args) {
+            [key]({name: nameArg, ...rest}, ...args) {
+              const {name} = unpackNameArg(nameArg);
               return boundComponents[key].apply(context, [{name: `${namespace}.${name}`, ...rest}, ...args]);
             },
             ...pointer
@@ -334,11 +376,13 @@ function connectForm(newForm, ...args) {
         } , {});
 
         return {
+          ...namespacedUtils,
           ...namespacedPropExpanders,
           ...namespacedBoundComponents,
           fieldsetPropsFor(subnamespace, ...args) {
             // Turtles all the way down
-            return fieldsetPropsFor.apply(context, [`${namespace}.${subnamespace}`, ...args]);
+            const {name} = unpackNameArg(subnamespace);
+            return fieldsetPropsFor.apply(context, [`${namespace}.${name}`, ...args]);
           }
         };
       }
@@ -353,6 +397,7 @@ function connectForm(newForm, ...args) {
           fieldsetPropsFor,
           ...events,
           ...propExpanders,
+          ...utilExpanders,
           ...boundComponents,
           ...rest
         });
