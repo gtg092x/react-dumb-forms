@@ -28,7 +28,7 @@ function AddressFieldset({propsFor, labelPropsFor, children, fieldsetPropsFor}) 
       </label>
       <div className="form-group">
         <label className="checkbox-inline" {...labelPropsFor('mail')}>
-          <input type="checkbox" {...propsFor({'mail': true})} />
+          <input type="checkbox" {...propsFor({'mail': Boolean})} />
           Can receive mail
         </label>
       </div>

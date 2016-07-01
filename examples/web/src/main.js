@@ -12,16 +12,11 @@ class Loader extends React.Component {
     this.state = {loaded: false};
   }
   componentWillMount() {
-    startup().then(() => this.setState({loaded: true}));
+    startup();
   }
   render() {
 
     return <Examples />;
-
-    const {loaded} = this.state;
-    return !loaded
-      ? (<div>loading...</div>)
-      : <Examples />;
   }
 }
 

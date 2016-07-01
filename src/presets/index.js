@@ -1,21 +1,28 @@
 import _ from 'lodash';
 
 import {Checked} from './checkbox';
-import {Text} from './web';
+import {WebInput} from './web';
 import {ReactSelect} from './popular-web-libs';
-import {NativeText, NativeDropDown} from './native';
+import {NativeInput, NativeDropDown} from './native';
 
 const presets = {
   Checked,
-  Text,
+  WebInput,
   ReactSelect,
-  NativeText,
+  NativeInput,
   NativeDropDown
 };
 
 const customPresets = {};
 
-let defaultPreset = Text;
+function getDefaultPreset() {
+  if (navigator.product === 'ReactNative') {
+    return NativeInput;  
+  }
+  return WebInput;
+}
+
+let defaultPreset = getDefaultPreset();
 
 function getPreset(preset) {
 

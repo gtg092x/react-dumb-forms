@@ -27,27 +27,15 @@ function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
     );
 }
 
-const validator = {
-    getError({name, value}) {
-        // replace with schema work
-        if (name === 'firstName' && !value) {
-            return `First name is required`;
-        }
-        if (name === 'lastName' && value === 'Doe') {
-            return `Last name cannot be Doe`;
-        }
-    },
-    getErrors(model) {
-        // replace with schema work
-        return Object.keys(model).reduce((pointer, key) => {
-            const error = validator.getError({name: key, value: model[key]});
-            if (error && error.length) {
-                pointer[key] = error;
-            }
-            return pointer;
-        }, {});
+const NameSchema = {
+    type: 'object',
+    properties: {
+        firstName: { type: 'string', minLength: 1 },
+        lastName: { type: 'string', minLength: 0 }
     }
 };
 
 
-export default connectForm(SimpleForm, validator);
+
+
+export default connectForm(SimpleForm, {schema: NameSchema});

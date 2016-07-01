@@ -1,9 +1,25 @@
-function getComponent() {
+function getDefaultLabelComponent() {
 
 }
 
-function setComponent() {
+function getDefaultErrorComponent() {
 
 }
 
-export {setComponent, getComponent};
+function getDefaultNullComponent() {
+
+}
+
+function setErrorComponent() {
+
+}
+
+function setLabelComponent() {
+
+}
+
+function setDefaultComponent() {
+
+}
+
+export {setErrorComponent, setDefaultComponent, setLabelComponent, getDefaultLabelComponent, getDefaultErrorComponent, getDefaultNullComponent};

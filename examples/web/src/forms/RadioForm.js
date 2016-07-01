@@ -9,6 +9,7 @@ function RadioForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
       {errorFor('*')}
 
       <div className="form-group">
+        <p style={{marginTop: 0, marginBottom: 0}}>My favorite color</p>
         <label className="radio-inline" {...labelPropsFor('favoriteColor', 'red')}>
           <input type="radio" {...propsFor({'favoriteColor': 'red'})} />
           Red
@@ -26,8 +27,21 @@ function RadioForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 
       <div className="form-group">
         <label className="checkbox-inline" {...labelPropsFor('isFlake')}>
-          <input type="checkbox" {...propsFor({'isFlake': true})} />
+          <input type="checkbox" {...propsFor('isFlake', 'Checked')} />
           I change my favorite color sometimes
+        </label>
+      </div>
+
+
+      <div className="form-group">
+        <p style={{marginTop: '1rem', marginBottom: 0}}>Should I have just used a checkbox?</p>
+        <label className="radio-inline" {...labelPropsFor('overEngineered', true)}>
+          <input type="radio" {...propsFor({'overEngineered': true})} />
+          Yes
+        </label>
+        <label className="radio-inline" {...labelPropsFor('overEngineered', false)}>
+          <input type="radio" {...propsFor({'overEngineered': false})} />
+          No
         </label>
       </div>
 

@@ -6,7 +6,7 @@
 import _ from 'lodash';
 import {getValueFromEvent} from '../lib';
 
-function Text({onChange, onBlur, onFocus, onSubmit}) {
+function WebInput({onChange, onBlur, onFocus}) {
   // your args are hooks from connect-form - use them!
   const onChangeTransformed = (e) => {
     const value = getValueFromEvent(e);
@@ -30,6 +30,6 @@ function Text({onChange, onBlur, onFocus, onSubmit}) {
 }
 
 
-export default Text;
+export default WebInput;
 
-export {Text};
+export {WebInput};

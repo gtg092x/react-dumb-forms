@@ -64,7 +64,8 @@ export default {
         props: {
             model: {
                 'favoriteColor': 'blue',
-                'isFlake': true
+                'isFlake': true,
+                'overEngineered': true
             }
         }
     },

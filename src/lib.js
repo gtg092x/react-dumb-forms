@@ -66,4 +66,16 @@ function repackNameArg({name, on}) {
   }
 }
 
-export {getValueFromEvent, genId, unpackNameArg, repackNameArg};
+function unpackObject(obj) {
+  if (_.isArray(obj)) {
+    return obj;
+  } else if (_.isPlainObject(obj)) {
+    const [name] = Object.keys(obj);
+    const val = obj[name];
+    return [name, val];
+  } else {
+    return [obj];
+  }
+}
+
+export {getValueFromEvent, genId, unpackNameArg, repackNameArg, unpackObject};

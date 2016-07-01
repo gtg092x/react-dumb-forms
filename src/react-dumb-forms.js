@@ -1,9 +1,9 @@
 import connectForm from './connect-form';
 
 export {setPreset} from './presets'
-export {addValidator} from './validators'
+export {setValidator} from './validators'
 
-export {setComponent} from './components'
+export {setLabelComponent, setErrorComponent, setDefaultComponent} from './components'
 
 export {connectForm};
 export default connectForm;

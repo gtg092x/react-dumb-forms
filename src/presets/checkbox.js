@@ -1,20 +1,20 @@
-function Checked({onChange, onBlur, onFocus, onSubmit, value}) {
+function Checked({onChange, targetValue, modelValue}) {
   // your args are hooks from connect-form - use them!
-
 
   const onChangeTransformed = (e) => {
     const target = e.target || e;
-    const {checked, value: targetValue} = target;
-    if (value === undefined) {
+    const {checked} = target;
+    if (targetValue === undefined) {
       onChange(checked);
-    } else if (value === targetValue && checked) {
-      onChange(value);
+    } else if (checked) {
+      onChange(targetValue);
     }
   };
 
   // getting sent to element
   return {
-    onChange: onChangeTransformed
+    onChange: onChangeTransformed,
+    checked: targetValue === undefined ? modelValue === true : targetValue === modelValue
   };
 }
 

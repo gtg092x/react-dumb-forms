@@ -9,14 +9,28 @@
  
  */
 
-function NativeText() {
+function NativeInput({onChange, onBlur, onFocus, onSubmit, name, value}) {
+  // your args are hooks from connect-form - use them!
+  const onBlurTransformed = () => {
+    onBlur(value);
+  };
+  const onFocusTransformed = () => {
+    onFocus(value);
+  };
 
+  // getting sent to element
+  return {
+    onChangeText: onChange,
+    onBlur: onBlurTransformed,
+    onSubmitEditing: onSubmit,
+    onFocus: onFocusTransformed
+  };
 }
 
 function NativeDropDown() {
 
 }
 
-export default Text;
+export default NativeInput;
 
-export {NativeText, NativeDropDown};
+export {NativeInput, NativeDropDown};

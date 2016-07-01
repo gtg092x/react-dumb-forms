@@ -2,8 +2,10 @@ import React from 'react';
 import ifErrorGenerator from './components/ifErrorGenerator';
 import dumbLabelGenerator from './components/dumbLabelGenerator';
 import {getPreset} from './presets';
-import defaults from './defaults'
-import {genId, unpackNameArg, repackNameArg} from './lib';
+import defaults from './defaults';
+import {getValidator} from './validators'
+import {getDefaultLabelComponent, getDefaultErrorComponent, getDefaultNullComponent} from './components'
+import {genId, unpackNameArg, repackNameArg, unpackObject} from './lib';
 
 import deepEqual from 'deep-equal';
 import _ from 'lodash';
@@ -14,13 +16,18 @@ function connectForm(newForm, ...args) {
     return {...pointer, ...arg};
   }, {});
 
-  const {
-    getError = _.noop,
-    getErrors = _.noop,
-    isNewModel = defaults.isNewModel,
-    LabelComponent,
-    ErrorComponent,
-    DefaultComponent
+  const {    
+    validator,
+    schema,
+    isNewModel = defaults.isNewModel
+  } = options;
+  
+  let {getError = _.noop, getErrors = _.noop} = options;
+
+  let {
+    LabelComponent = getDefaultLabelComponent(),
+    ErrorComponent = getDefaultErrorComponent(),
+    DefaultComponent =  getDefaultNullComponent()
   } = options;
 
   class BoundForm extends React.Component {
@@ -41,7 +48,7 @@ function connectForm(newForm, ...args) {
 
       /* reduced events */
       this.onBlur = this.onBlur.bind(this);
-      this.onSubmit = this.onSubmit.bind(this);
+      this.onFormSubmit = this.onFormSubmit.bind(this);
       this.onChange = this.onChange.bind(this);
       this.onKeyDown = this.onKeyDown.bind(this);
       this.onFocus = this.onFocus.bind(this);
@@ -50,15 +57,32 @@ function connectForm(newForm, ...args) {
       this.formProps = this.formProps.bind(this);
       this.propsFor = this.propsFor.bind(this);
       this.basePropsFor = this.basePropsFor.bind(this);
-      this.checkedPropsFor = this.checkedPropsFor.bind(this);
+      this.propsForWithTargetValue = this.propsForWithTargetValue.bind(this);
       this.labelPropsFor = this.labelPropsFor.bind(this);
 
       /* utils */
       this.componentRequirementMissing = this.componentRequirementMissing.bind(this);
       this.fieldState = this.fieldState.bind(this);
 
+
+
       this.errorCache = {};
       this.state = {dirt: {}, id: props.id || genId()};
+
+      if (schema !== undefined) {
+        const validatorFn = _.isFunction(validator)
+          ? validator
+          : getValidator(validator);
+        if (_.isFunction(validatorFn)) {
+          const validatorObj = validatorFn(schema);
+          this.getValidatorError = validatorObj.getError.bind(this);
+          this.getValidatorErrors = validatorObj.getErrors.bind(this);
+        }
+      } else {
+        this.getValidatorError = getError.bind(this);
+        this.getValidatorErrors = getErrors.bind(this);
+      }
+
     }
 
     getFieldId(name = '*') {
@@ -67,11 +91,11 @@ function connectForm(newForm, ...args) {
 
     getError({name, value}) {
       const {errorCache} = this;
-      return errorCache[name] || (errorCache[name] = getError({name, value}));
+      return errorCache[name] || (errorCache[name] = this.getValidatorError({name, value, model: this.getModel()}));
     }
 
     getErrors(model = this.getModel()) {
-      return this.errorCache = getErrors(model);
+      return this.errorCache = this.getValidatorErrors(model);
     }
 
     getDirt(name) {
@@ -84,7 +108,6 @@ function connectForm(newForm, ...args) {
     }
 
     componentWillReceiveProps(props) {
-
 
       const newModel = this.getModel(props);
       const oldModel = this.getModel(this.props);
@@ -109,16 +132,6 @@ function connectForm(newForm, ...args) {
         console.warn(`Warning, property ${name} not found in model:`, model);
       }
       return value;
-    }
-
-    basePropsFor(name) {
-      const props = {
-        onBlur: this.onBlur.bind(this, name),
-        onFocus: this.onFocus.bind(this, name),
-        name
-      };
-
-      return props;
     }
 
     getErrorArray(name) {
@@ -155,21 +168,7 @@ function connectForm(newForm, ...args) {
 
     /* Core Form Methods */
 
-    formProps() {
-      return {
-        onSubmit: this.onSubmit,
-        id: this.state.id,
-        type: 'post',
-        action: '#'
-      };
-    }
-
-    registerRef(name, ref) {
-      const {onRef = _.noop} = this.props;
-      onRef(name, ref);
-    }
-
-    onSubmit(e, source) {
+    onFormSubmit(e, source) {
       const {dirt} = this.state;
       const model = this.getModel();
       Object.keys(model).forEach(key => {
@@ -200,12 +199,40 @@ function connectForm(newForm, ...args) {
     onKeyDown(name, event) {
 
       if (event.which === ENTER_KEY && event.metaKey) {
-        this.onSubmit(event, name);
+        this.onFormSubmit(event, name);
         event.preventDefault();
         return false;
       }
     }
     /* End Core Form Methods */
+
+    basePropsFor(name) {
+
+      const {onSubmit = _.noop} = this.props;
+
+      const props = {
+        onBlur: this.onBlur.bind(this, name),
+        onFocus: this.onFocus.bind(this, name),
+        onSubmit: onSubmit.bind(this, this.getModel(), name),
+        name
+      };
+
+      return props;
+    }
+
+    formProps() {
+      return {
+        onSubmit: this.onFormSubmit,
+        id: this.state.id,
+        type: 'post',
+        action: '#'
+      };
+    }
+
+    registerRef(name, ref) {
+      const {onRef = _.noop} = this.props;
+      onRef(name, ref);
+    }
 
     fieldState(name, value) {
       const {disabled: disabledProp = {}, readonly: readonlyProp = {}} = this.props;
@@ -233,17 +260,20 @@ function connectForm(newForm, ...args) {
         : getPreset(presetArg);
 
 
-      if (_.isPlainObject(name) || _.isArray(name)) {
+      if (_.isPlainObject(name) || _.isArray(name) || presetArg === 'Checked') {
 
         const checkedPreset = presetArg === undefined
           ? getPreset('Checked')
           : preset;
 
         const {on, name: key} = unpackNameArg(name);
-        if (_.isBoolean(on) || on === null || on === Boolean) {
-          return this.checkedPropsFor(key, undefined, checkedPreset);
+
+        const isCheckbox = on === null || on === Boolean || on === undefined;
+
+        if (isCheckbox) {
+          return this.propsForWithTargetValue(key, undefined, checkedPreset);
         }
-        return this.checkedPropsFor(key, on, checkedPreset);
+        return this.propsForWithTargetValue(key, on, checkedPreset);
       }
 
 
@@ -261,23 +291,25 @@ function connectForm(newForm, ...args) {
       };
     }
 
-    checkedPropsFor(name, value, preset) {
+    propsForWithTargetValue(name, value, preset) {
 
       const fullName = value === undefined
         ? name
         : `${name}_${value}`;
 
-      const afterPreset = preset({...this.basePropsFor(name), onChange: this.onChange.bind(this, name), value});
+      const modelValue = this.getValue(name);
+
+      const afterPreset = preset({...this.basePropsFor(name), onChange: this.onChange.bind(this, name), targetValue: value, modelValue});
       if (!afterPreset.onChange) {
         console.warn(`Cannot find onChange for field ${name}. This probably won't work. Check your preset Checked.`);
       }
+
 
       return {
         ...this.basePropsFor(name),
         ...afterPreset,
         ...this.fieldState(name, value),
         ref: this.registerRef.bind(this, fullName),
-        checked: value === undefined ? this.getValue(name) === true : value === this.getValue(name),
         id: this.getFieldId(fullName),
         value
       };
@@ -291,15 +323,15 @@ function connectForm(newForm, ...args) {
       }
     }
 
-    labelPropsFor(...nameParts) {
+    labelPropsFor(...namePartsArgs) {
 
-      let fullName;
-      if (_.isPlainObject(nameParts[0])) {
-        const [key] = Object.keys(nameParts[0]);
-        fullName = `${key}_${nameParts[0][key]}`;
-      } else {
-        fullName = nameParts.join('_');
-      }
+      const nameParts = namePartsArgs.reduce((pointer, arg) => {
+        const argFrag = unpackObject(arg);
+        return pointer.concat(argFrag);
+      }, []).map(str => str.toString());
+      
+      let fullName = nameParts.join('_');
+      
       return {
         htmlFor: this.getFieldId(fullName)
       };
@@ -388,7 +420,7 @@ function connectForm(newForm, ...args) {
       }
 
       const events = {
-        onSubmit: this.onSubmit
+        onSubmit: this.onFormSubmit
       };
 
       return React.createElement(newForm,
