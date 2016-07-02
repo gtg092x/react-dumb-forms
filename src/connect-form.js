@@ -22,7 +22,7 @@ function connectForm(newForm, ...args) {
     isNewModel = defaults.isNewModel
   } = options;
   
-  let {getError = _.noop, getErrors = _.noop} = options;
+  let {getError = _.noop, getErrors = _.noop, onModelChange = _.noop, validationBlur = _.noop} = options;
 
   let {
     LabelComponent = getDefaultLabelComponent(),
@@ -43,7 +43,10 @@ function connectForm(newForm, ...args) {
       this.errorFor = this.errorFor.bind(this);
       this.formatErrors = this.formatErrors.bind(this);
       this.getErrorArray = this.getErrorArray.bind(this);
-      this.getFieldId = this.getFieldId.bind(this);
+      this.asyncValidationHook = this.asyncValidationHook.bind(this);
+      this.asyncValidationStatus = this.asyncValidationStatus.bind(this);
+      this.asyncValidationHook.status = this.asyncValidationStatus;
+        this.getFieldId = this.getFieldId.bind(this);
       this.registerRef = this.registerRef.bind(this);
 
       /* reduced events */
@@ -67,16 +70,27 @@ function connectForm(newForm, ...args) {
 
 
       this.errorCache = {};
-      this.state = {dirt: {}, id: props.id || genId()};
+      this.state = {dirt: {}, id: props.id || genId(), asyncErrors: {}, asyncStatus: {}};
+
+      this.onModelChange = onModelChange.bind(this);
+      this.validationBlur = validationBlur.bind(this);
+
+
 
       if (schema !== undefined) {
         const validatorFn = _.isFunction(validator)
           ? validator
           : getValidator(validator);
         if (_.isFunction(validatorFn)) {
-          const validatorObj = validatorFn(schema);
+          const validatorObj = validatorFn(schema, this.asyncValidationHook);
           this.getValidatorError = validatorObj.getError.bind(this);
           this.getValidatorErrors = validatorObj.getErrors.bind(this);
+          if (validatorObj.onModelChange) {
+            this.onModelChange = validatorObj.onModelChange.bind(this);
+          }
+          if (validatorObj.onBlur) {
+            this.validationBlur = validatorObj.onBlur.bind(this);
+          }
         }
       } else {
         this.getValidatorError = getError.bind(this);
@@ -98,6 +112,27 @@ function connectForm(newForm, ...args) {
       return this.errorCache = this.getValidatorErrors(model);
     }
 
+    asyncValidationStatus(errors, status) {
+      if (value !== undefined) {
+        const {asyncStatus} = this.state;
+        asyncStatus[errors] = status;
+        this.setState({asyncStatus});
+      } else {
+        this.setState({asyncStatus: errors});
+      }
+    }
+
+    asyncValidationHook(errors, value) {
+      if (value !== undefined) {
+        const {asyncErrors, asyncStatus} = this.state;
+        asyncErrors[errors] = value;
+        asyncStatus[errors] = null;
+        this.setState({asyncErrors, asyncStatus});
+      } else {
+        this.setState({asyncErrors: errors, asyncStatus: {}});
+      }
+    }
+
     getDirt(name) {
       const {dirt} = this.state;
       return dirt && dirt[name];
@@ -116,12 +151,16 @@ function connectForm(newForm, ...args) {
         // some validations affect field relationships
         // need to clear errors on every model update
         this.errorCache = {};
-        const {dirt} = this.state;
+        const updatedKeys = [];
+        const {dirt, asyncErrors} = this.state;
         Object.keys(oldModel).forEach(key => {
           if (newModel[key] !== oldModel[key]) {
             dirt[key] = false;
+            asyncErrors[key] = null;
+            updatedKeys.push(key);
           }
         });
+        this.onModelChange(updatedKeys, newModel, this.state.currentFocus);
         this.setState({dirt});
       }
     }
@@ -147,7 +186,12 @@ function connectForm(newForm, ...args) {
       if (!Array.isArray(schemaErrors)) {
         schemaErrors = [schemaErrors];
       }
-      const allErrors = parentErrors.concat(schemaErrors);
+
+      let asyncErrors = this.state.asyncErrors[name];
+      if (!Array.isArray(asyncErrors)) {
+        asyncErrors = [asyncErrors];
+      }
+      const allErrors = parentErrors.concat(schemaErrors).concat(_.compact(asyncErrors));
       if (allErrors.length === 0) {
         return null;
       }
@@ -191,9 +235,11 @@ function connectForm(newForm, ...args) {
       this.props.onBlur({name, value});
       const {dirt} = this.state;
       dirt[name] = true;
+      this.validationBlur(name, value);
       this.setState({dirt});
     }
     onFocus(name, value) {
+      this.setState({currentFocus: name});
       this.props.onFocus({name, value});
     }
     onKeyDown(name, event) {

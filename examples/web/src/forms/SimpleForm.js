@@ -28,14 +28,8 @@ function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 }
 
 const NameSchema = {
-    type: 'object',
-    properties: {
-        firstName: { type: 'string', minLength: 1 },
-        lastName: { type: 'string', minLength: 0 }
-    }
+    firstName: { presence: true, length: {minimum: 1} },
+    lastName: { presence: false, length: {minimum: 3} }
 };
-
-
-
 
 export default connectForm(SimpleForm, {schema: NameSchema});

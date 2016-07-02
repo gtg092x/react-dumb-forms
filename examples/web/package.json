@@ -32,6 +32,6 @@
     "react-datepicker": "^0.27.0",
     "react-dom": "^15.1.0",
     "react-select": "^1.0.0-beta13",
-    "schema-inspector": "^1.6.4"
+    "validate.js": "^0.10.0"
   }
 }

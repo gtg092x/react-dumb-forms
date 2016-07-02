@@ -1,32 +1,32 @@
 import {setValidator} from 'react-dumb-forms';
-import inspector from 'schema-inspector';
+import validate from 'validate.js';
 
-function schemaInspectorBinder(config) {
+function schemaInspectorBinder(config, async) {
 
   const getErrors = (model) => {
-    const result = inspector.validate(config, model);
-    if (result.valid) {
-      return null;
-    }
-    return result.error.reduce((pointer, error) => {
-      const name = error.property.replace(/^@\./, '');
-      pointer[name] = pointer[name] || [];
-      pointer[name].push(error.message);
-      return pointer;
-    }, {});
+    return validate(model, config);
   };
 
   const getError = ({name, value, model}) => {
-    const result = getErrors(model);
-    if (!result) {
-      return null;
+    const constraints = config[name];
+    if (!constraints) {
+      return;
     }
-    return result[name];
+    return validate.single(value, config[name]);
+  };
+
+  const onBlur = (name, value) => {
+    console.log(name, value);
+    setTimeout(function(){
+      async(name, 'I dont like it');
+    }, 500);
+
   };
 
   return {
     getError,
-    getErrors
+    getErrors,
+    onBlur
   };
 
 }
