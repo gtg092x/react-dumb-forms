@@ -1,7 +1,7 @@
 React Dumb Forms
 ================
 
-Functional forms powered by [React][].
+Functional forms with validation plugins powered by [React][].
 
 ## Installation
 
@@ -11,225 +11,143 @@ Functional forms powered by [React][].
 
 ###React Dumb Forms is a toolset for building simple, deterministic forms
 
-Getting tired of managing custom re-implementations of every kind of input? Yeah, me too. With React Dumb Forms, you can use every input already created by Facebook and every custom input widget that implements `onChange` and `onBlur` - hell, we'll also support `onChangeText` (for you React Native heroes).
+Getting tired of managing custom re-implementations of every kind of input? Yeah, me too. With React Dumb Forms, you can use every input already created by Facebook and every custom input widget that implements `onChange` and `onBlur` - if those don't work for you - you can use presets to write your own!
 
+> But wait, there's more
+
+Integrate schema validation once and forget about it forever! After setting your validation system, you only need to pass in config once when you build a form. It can even be asynchronous.
+
+> You're crazy, how does this magic work?
+ 
+Simple - property generation. We're giving you a handful of methods that return objects that you would pass to your input components as properties. Have a look.
+
+### A dumb form
+
+#### MyDumbForm.js
 
 ```js
-import React from 'react'
-import {Fieldset, Field, createValue} from 'react-forms'
+import React from 'react';
+import {connectForm} from 'react-dumb-forms';
 
-class Form extends React.Component {
-
-  constructor(props) {
-    super(props)
-    let formValue = createValue({value: props.value, onChange: this.onChange})
-    this.state = {formValue}
-  }
-
-  onChange = (formValue) => {
-    this.setState({formValue})
-  }
-
-  render() {
+function MyDumbForm ({propsFor, labelPropsFor, formProps}) {
     return (
-      <Fieldset formValue={this.state.formValue}>
-        <Field select="firstName" label="First name" />
-        <Field select="lastName" label="Last name" />
-      </Fieldset>
-    )
-  }
+        <form {...formProps()}>
+            <label {...labelPropsFor('firstName')}>First Name</label>
+            <input {...propsFor('firstName')} />
+            <button type="submit">Submit</button>
+        </form>
+    );
+}
+
+export default connectForm(MyDumbForm);
+```
+
+### A smart component
+
+#### MySmartComponent.js
+
+```js
+import React from 'react';
+import MyDumbForm from './MyDumbForm';
+
+class MySmartComponent extends React.Component{
+    constructor() {
+        super();
+        this.state = {};
+    }
+    onChange({name, value}) {
+        this.setState({[name]: value});
+    }
+    onSubmit(model) {
+        this.setState({model});
+        console.log("Send this to a server or something!");
+    }
+    render() {
+        return (
+            <MyDumbForm 
+                onChange={this.onChange} 
+                onSubmit={this.onSubmit} 
+                model={this.state} 
+            />
+        );
+    }
 }
 ```
 
 ### Validation
 
-React Forms can validate form value using JSON schema:
+We don't care what you use! You can use almost any validation system as long you can implement a few error fetching methods.  
 
 ```js
-let schema = {
-  type: 'object',
-  properties: {
-    firstName: {type: 'string'},
-    lastName: {type: 'string'}
-  }
-}
+import {setValidator} from 'react-dumb-forms';
+
+setValidator(function(config) {
+    // TODO
+    return {getError, getErrors};
+});
+
 ```
-
-Simply pass it to `createValue` function:
-
-```js
-let formValue = createValue({schema, initialValue, onChange})
-```
-
-The `<Field />` will automatically renders validation errors if any.
 
 ### Customizing form fields
 
-All components in React Forms conform to [React Stylesheet][] API. That means
-that for injecting customization one needs `react-stylesheet` package to be
-installed:
+Do whatever you want!
 
-    % npm install react-stylesheet
-
-Customizing label rendering:
+All dumb forms is doing is passing properties to your form components. 
 
 ```js
 import React from 'react'
-import {style} from 'react-stylesheet'
-import {Field as BaseField, Label as BaseLabel} from 'react-forms'
 
-function Label({label, schema}) {
-  return <BaseLabel className="my-label" label={label} schema={schema} />
-}
+function MyCustomField(props) {
 
-let Field = style(BaseField, {
-  Label: Label
-})
-```
-
-Customizing error list rendering:
-
-```js
-import React from 'react'
-import {style} from 'react-stylesheet'
-import {Field as BaseField, ErrorList as BaseErrorList} from 'react-forms'
-
-function ErrorList({formValue}) {
-  return <BaseErrorList className="my-error-list" formValue={formValue} />
-}
-
-let Field = style(BaseField, {
-  ErrorList: ErrorList
-})
-```
-
-Form field with custom input component:
-
-```js
-import React from 'react'
-import {Field} from 'react-forms'
-import Datepicker from 'datepicker'
-
-function DateField(props) {
-  return <Field {...props} Input={Datepicker} />
-}
-```
-
-Implementing form field component from scratch:
-
-```js
-import React from 'react'
-import {WithFormValue} from 'react-forms'
-
-class Field extends React.Component {
-
-  render() {
-    let {formValue} = this.props
     return (
-      <div>
-        <label>{formValue.schema.label}</label>
-        <input value={formValue.value} onChange={this.onChange} />
-      </div>
-    )
-  }
-
-  onChange = (e) => this.props.formValue.update(e.target.value)
+        <div>
+            <input {...props} />
+        </div>
+    );
 }
 
-Field = WithFormValue(Field);
 ```
 
-## Pattern for reusable forms
+### Error Utils
+
+// TODO
 
 ```js
 import React from 'react'
-import {Fieldset} from 'react-forms'
 
-class IndividualFieldset extends Fieldset {
 
-  static schema = {
-    type: 'object',
-    properties: {
-      firstName: {type: 'string'},
-      lastName: {type: 'string'}
-    }
-  }
-
-  static value = {
-    firstName: 'John',
-    lastName: 'Doe'
-  }
-
-  render() {
-    let {label, ...props} = this.props
-    return (
-      <Fieldset {...props}>
-        <label>{label}</label>
-        <Field
-          select="firstName"
-          label="First name"
-          />
-        <Field
-          select="lastName"
-          label="Last name"
-          />
-      </Fieldset>
-    )
-  }
-}
 ```
 
-Later you can compose schema and initial form value using `IndividualFieldset.schema`
-and `IndividualFieldset.value` static properties and use `<IndividualFieldset />` component
-itself for rendering.
+### Fieldsets
+
+// TODO
 
 ```js
-let schema = {
-  type: 'object',
-  properties: {
-    mother: IndividualFieldset.schema,
-    father: IndividualFieldset.schema
-  }
-}
+import React from 'react'
 
-let value = {
-  mother: IndividualFieldset.value,
-  father: IndividualFieldset.value
-}
 
-class FamilyForm extends React.Component {
+```
 
-  constructor(props) {
-    super(props)
-    this.state = {formValue: createValue({schema, value, this.onChange})}
-  }
+### Radio and Checkbox Buttons
 
-  onChange = (nextFormValue) => {
-    this.setState({formValue: nextFormValue})
-  }
+// TODO
 
-  render() {
-    return (
-      <Fieldset formValue={this.state.formValue}>
-        <IndividualFieldset
-          select="mother"
-          label="Mother"
-          />
-        <IndividualFieldset
-          select="father"
-          label="Father"
-          />
-      </Fieldset>
-    )
-  }
-}
+```js
+import React from 'react'
+
+
+```
+
+### Presets
+
+```js
+import React from 'react'
+
 ```
 
 ## Credits
 
-React Forms is free software created by [Prometheus Research, LLC][] and is
-released under the MIT license.
+React Dumb Forms is free software under the MIT license. It was created in sunny Santa Monica by [Matthew Drake][].
 
 [React]: http://facebook.github.io/react/
-[React Stylesheet]: https://github.com/prometheusresearch/react-stylesheet
-[Prometheus Research, LLC]: http://prometheusresearch.com
+[Matthew Drake]: http://www.mediadrake.com

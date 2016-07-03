@@ -152,8 +152,22 @@ function connectForm(newForm, ...args) {
         // need to clear errors on every model update
         this.errorCache = {};
         const updatedKeys = [];
+        const removedKeys = [];
+        const addedKeys = [];
         const {dirt, asyncErrors} = this.state;
+
+        Object.keys(newModel).forEach(key => {
+          if (oldModel[key] === undefined) {
+            addedKeys.push(key);
+          }
+        });
+
         Object.keys(oldModel).forEach(key => {
+
+          if (newModel[key] === undefined) {
+            removedKeys.push(key);
+          }
+
           if (newModel[key] !== oldModel[key]) {
             dirt[key] = false;
             asyncErrors[key] = null;
