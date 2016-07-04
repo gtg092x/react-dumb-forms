@@ -63,7 +63,6 @@ export default {
         formName: 'RadioForm',
         props: {
             model: {
-                'favoriteColor': 'blue',
                 'isFlake': true,
                 'overEngineered': true
             }

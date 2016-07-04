@@ -1,6 +1,7 @@
 node_modules
 bower_components
-lib/
+/lib/
+/examples/lib/lib/
 coverage/
 .nyc_output/
 .idea

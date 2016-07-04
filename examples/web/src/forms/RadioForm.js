@@ -2,6 +2,8 @@ import React from 'react';
 import { form, input, button } from 'react-dom';
 import { connectForm } from 'react-dumb-forms';
 
+import {schemas} from 'react-dumb-forms-examples-lib';
+
 function RadioForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 
   return (
@@ -9,6 +11,7 @@ function RadioForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
       {errorFor('*')}
 
       <div className="form-group">
+        <span className="has-error">{errorFor('favoriteColor')}</span>
         <p style={{marginTop: 0, marginBottom: 0}}>My favorite color</p>
         <label className="radio-inline" {...labelPropsFor('favoriteColor', 'red')}>
           <input type="radio" {...propsFor({'favoriteColor': 'red'})} />
@@ -50,23 +53,4 @@ function RadioForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
   );
 }
 
-const validator = {
-  getError({name, value}) {
-    // replace with schema work
-    // TODO
-    return false;
-  },
-  getErrors(model) {
-    // replace with schema work
-    return Object.keys(model).reduce((pointer, key) => {
-      const error = validator.getError({name: key, value: model[key]});
-      if (error && error.length) {
-        pointer[key] = error;
-      }
-      return pointer;
-    }, {});
-  }
-};
-
-
-export default connectForm(RadioForm, validator);
+export default connectForm(RadioForm, schemas.RadioFormSchema);

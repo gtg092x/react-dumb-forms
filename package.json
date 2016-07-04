@@ -32,12 +32,12 @@
   "keywords": [
     "forms",
     "react",
-    "react-component"
+    "react-dumb-forms"
   ],
   "author": "gtg092x",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/gtg092x/react-forms/issues"
+    "url": "https://github.com/gtg092x/react-dumb-forms/issues"
   },
   "peerDependencies": {
     "react": "^15.1.0"

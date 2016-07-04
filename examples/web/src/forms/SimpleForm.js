@@ -2,6 +2,7 @@ import React from 'react';
 import { form, input, button } from 'react-dom';
 import { connectForm } from 'react-dumb-forms';
 
+import {schemas} from 'react-dumb-forms-examples-lib';
 
 function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 
@@ -27,9 +28,5 @@ function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
     );
 }
 
-const NameSchema = {
-    firstName: { presence: true, length: {minimum: 1} },
-    lastName: { presence: false, length: {minimum: 3} }
-};
 
-export default connectForm(SimpleForm, {schema: NameSchema});
+export default connectForm(SimpleForm, {schema: schemas.SimpleFormSchema});

@@ -32,7 +32,7 @@ module.exports = {
     loaders: [{
       test: /\.js(x)?$/,
       include: [src, path.join(__dirname, './src'),
-        path.join(__dirname, '../src')],
+        path.join(__dirname, '../src'), path.join(__dirname, '../lib')],
       loaders: ['babel'],
     },
     { test: /\.css$/, loader: 'style-loader!css-loader' },

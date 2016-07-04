@@ -22,7 +22,7 @@ function connectForm(newForm, ...args) {
     isNewModel = defaults.isNewModel
   } = options;
   
-  let {getError = _.noop, getErrors = _.noop, onModelChange = _.noop, validationBlur = _.noop} = options;
+  let {getError = _.noop, getErrors = _.noop, validationBlur = _.noop} = options;
 
   let {
     LabelComponent = getDefaultLabelComponent(),
@@ -68,14 +68,10 @@ function connectForm(newForm, ...args) {
       this.fieldState = this.fieldState.bind(this);
 
 
+      this.state = {dirt: {}, errors: {}, id: props.id || genId(), asyncErrors: {}, asyncStatus: {}};
 
-      this.errorCache = {};
-      this.state = {dirt: {}, id: props.id || genId(), asyncErrors: {}, asyncStatus: {}};
 
-      this.onModelChange = onModelChange.bind(this);
       this.validationBlur = validationBlur.bind(this);
-
-
 
       if (schema !== undefined) {
         const validatorFn = _.isFunction(validator)
@@ -103,13 +99,12 @@ function connectForm(newForm, ...args) {
       return `${this.state.id}${name === '*' ? '_global' : name}`;
     }
 
-    getError({name, value}) {
-      const {errorCache} = this;
-      return errorCache[name] || (errorCache[name] = this.getValidatorError({name, value, model: this.getModel()}));
+    getError({name, value, model}) {
+      return this.getValidatorError({name, value, model});
     }
 
     getErrors(model = this.getModel()) {
-      return this.errorCache = this.getValidatorErrors(model);
+      return this.getValidatorErrors(model);
     }
 
     asyncValidationStatus(errors, status) {
@@ -129,7 +124,11 @@ function connectForm(newForm, ...args) {
         asyncStatus[errors] = null;
         this.setState({asyncErrors, asyncStatus});
       } else {
-        this.setState({asyncErrors: errors, asyncStatus: {}});
+        const newErrors = {
+          ...asyncErrors,
+          ...errors
+        };
+        this.setState({asyncErrors: newErrors, asyncStatus: {}});
       }
     }
 
@@ -150,33 +149,49 @@ function connectForm(newForm, ...args) {
       if (!deepEqual(newModel, oldModel) && isNewModel(newModel, oldModel)) {
         // some validations affect field relationships
         // need to clear errors on every model update
-        this.errorCache = {};
-        const updatedKeys = [];
-        const removedKeys = [];
-        const addedKeys = [];
-        const {dirt, asyncErrors} = this.state;
+        const updated = [];
+        const removed = [];
+        const added = [];
 
         Object.keys(newModel).forEach(key => {
           if (oldModel[key] === undefined) {
-            addedKeys.push(key);
+            added.push(key);
           }
         });
 
         Object.keys(oldModel).forEach(key => {
 
           if (newModel[key] === undefined) {
-            removedKeys.push(key);
-          }
-
-          if (newModel[key] !== oldModel[key]) {
-            dirt[key] = false;
-            asyncErrors[key] = null;
-            updatedKeys.push(key);
+            removed.push(key);
+          } else if (newModel[key] !== oldModel[key] && !_.contains(added, key)) {
+            updated.push(key);
           }
         });
-        this.onModelChange(updatedKeys, newModel, this.state.currentFocus);
-        this.setState({dirt});
+        const changes = _.unique([...added, ...removed, ...updated]);
+        this.onModelChange(newModel, {added, removed, updated, changes}, this.state.currentFocus);
+
       }
+    }
+
+    onModelChange(newModel, {added, removed, updated, changes}, currentFocus) {
+      const {dirt, asyncErrors} = this.state;
+      let {errors = {}} = this.state;
+
+      changes.forEach(key => {
+        dirt[key] = false;
+        asyncErrors[key] = null;
+      });
+
+
+      if (added.length > 0 || removed.length > 0) {
+        errors = this.getErrors(newModel, currentFocus) || {};
+      } else {
+        updated.forEach(key => {
+          errors[key] = this.getError({name: key, value: newModel[key], model: newModel});
+        });
+      }
+
+      this.setState({dirt, errors});
     }
 
     getValue(name, model = this.getModel()) {
@@ -192,11 +207,12 @@ function connectForm(newForm, ...args) {
         return null;
       }
       const {errors} = this.props;
+      const {errors: stateErrors = {}} = this.state;
       let parentErrors = (errors || {})[name];
       if (!Array.isArray(parentErrors)) {
         parentErrors = [parentErrors];
       }
-      let schemaErrors = this.getError({name, value: this.getValue(name)}) || [];
+      let schemaErrors = stateErrors[name] || [];
       if (!Array.isArray(schemaErrors)) {
         schemaErrors = [schemaErrors];
       }
@@ -232,11 +248,12 @@ function connectForm(newForm, ...args) {
       Object.keys(model).forEach(key => {
         dirt[key] = true;
       });
-      this.setState({dirt});
-      const errors = this.getErrors(this.getModel());
+      const errors = this.getErrors(model);
+      this.setState({errors, dirt});
       if (!errors || !Object.keys(errors).length) {
         this.props.onSubmit(this.getModel(), source);
       }
+
       e.preventDefault();
       return false;
     }
