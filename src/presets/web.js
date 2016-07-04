@@ -23,6 +23,7 @@ function WebInput({onChange, onBlur, onFocus}) {
 
   // getting sent to element
   return {
+    type: 'text',
     onChange: onChangeTransformed,
     onBlur: onBlurTransformed,
     onFocus: onFocusTransformed

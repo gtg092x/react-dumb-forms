@@ -5,7 +5,8 @@
   "main": "lib/react-dumb-forms.js",
   "scripts": {
     "test": "make test-cov",
-    "compile": "babel --source-maps inline --optional runtime -d lib/ src/",
+    "gh-page": "./node_modules/.bin/pug index.pug",
+    "compile": "./node_modules/.bin/babel --source-maps inline --optional runtime -d lib/ src/",
     "prepublish": "npm run compile"
   },
   "babel": {
@@ -62,6 +63,8 @@
     "node-libs-browser": "^1.0.0",
     "nyc": "^6.1.1",
     "power-assert": "^1.3.1",
+    "pug": "^2.0.0-beta3",
+    "pug-cli": "^1.0.0-alpha6",
     "react": "^15.1.0",
     "sinon": "^1.16.1",
     "tape": "^2.13.4",

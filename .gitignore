@@ -2,6 +2,7 @@ node_modules
 bower_components
 /lib/
 /examples/lib/lib/
+/examples/web/js
 coverage/
 .nyc_output/
 .idea

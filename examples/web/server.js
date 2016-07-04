@@ -17,20 +17,3 @@ new WebpackDevServer(webpack(config), {
   }
   console.log('Listening at 0.0.0.0:4000');
 });
-
-var spawn = require('child_process').spawn;
-var path = require('path');
-
-var npm = spawn('npm', ['run', 'start'], {cwd: path.join(__dirname, '../server')});
-
-function transString(fn) {
-  return function() {
-    fn.apply(this, ['SERVER'].concat(Array.prototype.slice.call(arguments).map(function(buf) {
-      return buf.toString();
-    })));
-  };
-}
-
-npm.stdout.on('data', transString(console.log));
-npm.stderr.on('data', transString(console.log));
-npm.on('close', transString(console.log.bind(this, 'Child process exited')));
