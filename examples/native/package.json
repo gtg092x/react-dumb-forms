@@ -8,7 +8,9 @@
   "dependencies": {
     "react": "^15.1.0",
     "react-dumb-forms": "file:../..",
-    "react-native": "0.27.2"
+    "react-dumb-forms-examples-lib": "file:../lib",
+    "react-native": "0.27.2",
+    "validate.js": "^0.10.0"
   },
   "devDependencies": {
     "babel-plugin-transform-do-expressions": "^6.8.0",

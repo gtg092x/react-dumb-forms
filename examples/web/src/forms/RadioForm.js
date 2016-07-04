@@ -53,4 +53,4 @@ function RadioForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
   );
 }
 
-export default connectForm(RadioForm, schemas.RadioFormSchema);
+export default connectForm(RadioForm, {schema: schemas.RadioFormSchema});

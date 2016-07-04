@@ -7,14 +7,14 @@ export default function dumbLabelGenerator({errorFor, getDirt, labelPropsFor}, {
         const dirt = getDirt(name);
 
         const errorContent = (errors && dirt)
-            ? React.cloneElement(children, {name, errors, ...props})
+            ? React.createElement(ErrorComponent, {name, errors, ...props})
             : null;
 
 
         return (
             <LabelComponent {...labelPropsFor(name)} {...props}>
-                {errorContent}
                 {children}
+                {errorContent}
             </LabelComponent>
         );
     }

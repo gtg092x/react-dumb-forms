@@ -4,7 +4,7 @@ import { connectForm } from 'react-dumb-forms';
 
 import {schemas} from 'react-dumb-forms-examples-lib';
 
-function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
+function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError, IfError, DumbLabel, DumbError}) {
 
     return (
       <form {...formProps()}>
@@ -12,10 +12,7 @@ function SimpleForm({formProps, propsFor, labelPropsFor, errorFor, ifError}) {
 
         <label className="form-group" {...labelPropsFor('firstName')}>
             First Name
-
-            {ifError('firstName', function({errors}) {
-                return <span className="has-error">{errors}</span>;
-            })}
+            <DumbError name="firstName" />
         <input className="form-control" {...propsFor('firstName')} />
         </label>
         <label className="form-group">

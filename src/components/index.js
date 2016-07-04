@@ -1,25 +1,25 @@
-function getDefaultLabelComponent() {
+let DefaultErrorComponent;
+let DefaultLabelComponent;
 
+function getDefaultLabelComponent() {
+  return DefaultLabelComponent;
 }
 
 function getDefaultErrorComponent() {
-
+  return DefaultErrorComponent;
 }
 
-function getDefaultNullComponent() {
-
+function setErrorComponent(component) {
+  DefaultErrorComponent = component;
 }
 
-function setErrorComponent() {
-
+function setLabelComponent(component) {
+  DefaultLabelComponent = component;
 }
 
-function setLabelComponent() {
 
-}
+import dumbErrorGenerator from './dumbErrorGenerator';
+import ifErrorGenerator from './ifErrorGenerator';
+import dumbLabelGenerator from './dumbLabelGenerator';
 
-function setDefaultComponent() {
-
-}
-
-export {setErrorComponent, setDefaultComponent, setLabelComponent, getDefaultLabelComponent, getDefaultErrorComponent, getDefaultNullComponent};
+export {setErrorComponent, setLabelComponent, getDefaultLabelComponent, getDefaultErrorComponent, ifErrorGenerator, dumbErrorGenerator, dumbLabelGenerator};

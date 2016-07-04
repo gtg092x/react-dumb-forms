@@ -12,9 +12,16 @@ import {
   View
 } from 'react-native';
 
+import startup from './src/startup';
+
 import SimpleForm from './src/containers/SimpleContainer';
 
 class DumbFormsNativeExamples extends Component {
+
+  componentWillMount() {
+    startup();
+  }
+
   render() {
     return (
       <View style={styles.container}>

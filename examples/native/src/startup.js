@@ -1,5 +1,4 @@
-import React from 'react';
-import {setValidator, setLabelComponent, setErrorComponent} from 'react-dumb-forms';
+import {setValidator} from 'react-dumb-forms';
 import validate from 'validate.js';
 
 function schemaInspectorBinder(config, async) {
@@ -31,18 +30,8 @@ function schemaInspectorBinder(config, async) {
 
 }
 
-function LabelComponent({children, ...props}) {
-  return <label {...props}>{children}</label>;
-}
-
-function ErrorComponent({errors, children, className = ``, ...props}) {
-  return <span className={`has-error ${className}`} {...props}>{errors}{children}</span>;
-}
-
 function startup() {
   setValidator(schemaInspectorBinder);
-  setLabelComponent(LabelComponent);
-  setErrorComponent(ErrorComponent);
 }
 
 export default startup;

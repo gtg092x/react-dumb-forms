@@ -1,10 +1,8 @@
 import React from 'react';
-import ifErrorGenerator from './components/ifErrorGenerator';
-import dumbLabelGenerator from './components/dumbLabelGenerator';
 import {getPreset} from './presets';
 import defaults from './defaults';
 import {getValidator} from './validators'
-import {getDefaultLabelComponent, getDefaultErrorComponent, getDefaultNullComponent} from './components'
+import {getDefaultLabelComponent, getDefaultErrorComponent, dumbErrorGenerator, dumbLabelGenerator, ifErrorGenerator} from './components'
 import {genId, unpackNameArg, repackNameArg, unpackObject} from './lib';
 
 import deepEqual from 'deep-equal';
@@ -25,9 +23,8 @@ function connectForm(newForm, ...args) {
   let {getError = _.noop, getErrors = _.noop, validationBlur = _.noop} = options;
 
   let {
-    LabelComponent = getDefaultLabelComponent(),
-    ErrorComponent = getDefaultErrorComponent(),
-    DefaultComponent =  getDefaultNullComponent()
+    LabelComponent,
+    ErrorComponent
   } = options;
 
   class BoundForm extends React.Component {
@@ -92,6 +89,9 @@ function connectForm(newForm, ...args) {
         this.getValidatorError = getError.bind(this);
         this.getValidatorErrors = getErrors.bind(this);
       }
+
+      this.ErrorComponent = ErrorComponent || getDefaultErrorComponent() || _.noop;
+      this.LabelComponent = LabelComponent || getDefaultLabelComponent() || _.noop;
 
     }
 
@@ -245,12 +245,15 @@ function connectForm(newForm, ...args) {
     onFormSubmit(e, source) {
       const {dirt} = this.state;
       const model = this.getModel();
-      Object.keys(model).forEach(key => {
+
+      const errors = this.getErrors(model) || {};
+      const errorKeys = Object.keys(errors);
+      _.unique([...Object.keys(model), ...errorKeys]).forEach(key => {
         dirt[key] = true;
       });
-      const errors = this.getErrors(model);
+
       this.setState({errors, dirt});
-      if (!errors || !Object.keys(errors).length) {
+      if (!errorKeys.length) {
         this.props.onSubmit(this.getModel(), source);
       }
 
@@ -312,7 +315,7 @@ function connectForm(newForm, ...args) {
     }
 
     fieldState(name, value) {
-      const {disabled: disabledProp = {}, readonly: readonlyProp = {}} = this.props;
+      const {disabled: disabledProp = {}, readOnly: readOnlyProp = {}} = this.props;
 
       const fullName = value !== undefined && `${name}_${value}`;
 
@@ -320,12 +323,12 @@ function connectForm(newForm, ...args) {
         ? ((value !== undefined && disabledProp[fullName]) || disabledProp[name] || disabledProp['*'])
         : disabledProp;
 
-      const readonly = !_.isBoolean(readonlyProp)
-        ? ((value !== undefined && readonlyProp[fullName]) || readonlyProp[name] || readonlyProp['*'])
-        : readonlyProp;
+      const readOnly = !_.isBoolean(readOnlyProp)
+        ? ((value !== undefined && readOnlyProp[fullName]) || readOnlyProp[name] || readOnlyProp['*'])
+        : readOnlyProp;
 
       return {
-        readonly,
+        readOnly,
         disabled
       };
     }
@@ -424,15 +427,17 @@ function connectForm(newForm, ...args) {
 
       const {model, ...rest} = this.props;
 
-      const {errorFor, getDirt, ifError, formProps, propsFor, labelPropsFor, checkedPropsFor, getValue, onChange} = this;
+      const {errorFor, getDirt, ifError, formProps, propsFor, labelPropsFor, getValue} = this;
 
-      const IfError = DefaultComponent
-        ? ifErrorGenerator({errorFor, getDirt}, {DefaultComponent})
-        : this.componentRequirementMissing('You need to pass in option `DefaultComponent`');
+      const IfError = ifErrorGenerator({errorFor, getDirt});
 
-      const DumbLabel = LabelComponent
-        ? dumbLabelGenerator({errorFor, getDirt, labelPropsFor}, {LabelComponent, ErrorComponent})
-        : this.componentRequirementMissing('You need to pass in option `LabelComponent` and `ErrorComponent`');
+      const DumbLabel = (this.LabelComponent && this.ErrorComponent)
+        ? dumbLabelGenerator({errorFor, getDirt, labelPropsFor}, {LabelComponent: this.LabelComponent, ErrorComponent: this.ErrorComponent})
+        : this.componentRequirementMissing('You need to pass in or set option `LabelComponent` and `ErrorComponent`');
+
+      const DumbError = this.ErrorComponent
+        ? dumbErrorGenerator({errorFor, getDirt}, {ErrorComponent: this.ErrorComponent})
+        : this.componentRequirementMissing('You need to pass in or set option `ErrorComponent`');
 
       const utilExpanders = {
         errorFor,
@@ -448,6 +453,7 @@ function connectForm(newForm, ...args) {
 
       const boundComponents = {
         DumbLabel,
+        DumbError,
         IfError
       };
 
