@@ -5,7 +5,7 @@
   "main": "lib/react-dumb-forms.js",
   "scripts": {
     "test": "make test-cov",
-    "gh-page": "./node_modules/.bin/pug index.pug",
+    "gh-page": "./node_modules/.bin/lessc style.less style.css && ./node_modules/.bin/pug index.pug",
     "compile": "./node_modules/.bin/babel --source-maps inline --optional runtime -d lib/ src/",
     "prepublish": "npm run compile"
   },
@@ -59,6 +59,8 @@
     "eslint-plugin-jsx-a11y": "^1.4.2",
     "eslint-plugin-react": "^5.1.1",
     "jsdom": "^6.3.0",
+    "jstransformer-marked": "^1.0.1",
+    "less": "^2.7.1",
     "mocha": "^2.3.2",
     "node-libs-browser": "^1.0.0",
     "nyc": "^6.1.1",

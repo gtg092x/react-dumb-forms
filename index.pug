@@ -3,9 +3,47 @@ html(lang="en")
     head
         title React Dumb Forms
         link(href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css",rel="stylesheet",integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd",crossorigin="anonymous")
+        script(src="https://use.fontawesome.com/9237579915.js")
+        link(href="/style.css",rel="stylesheet")
         meta(charset="UTF-8")
 
     body
         div#root
+            div.nav.nav-inline.navbar-light.bg-faded
+                nav.container.navbar-nav
+                    a.nav-link(href='#installation') Install
+                    a.nav-link(href='#usage') Usage
+                    a.nav-link(href='#validation') Customization
+                    a.nav-link(href='/examples/web/index.html') Examples
+                    a.nav-link.github(href='https://github.com/gtg092x/react-dumb-forms',target="_blank")
+                        span.fa.fa-github
+                        | Github
+            div.masthead
+                h1.container
+                    //span.fa.fa-hand-o-left
+                    //span.fa.fa-smile-o
+                    //span.fa.fa-hand-o-right
+                    span.text Your Form is so Dumb
+                    div.joke
+                        a.content(target="blank",href="https://www.youtube.com/watch?v=HP8sofAN4xc") !{"&nbsp;"}
+                        button(type="button").more-jokes.btn.btn-link.fa.fa-refresh
+            div.container#readme
+                include:marked ./README.md
         script(src="https://code.jquery.com/jquery-2.2.4.min.js",integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=",crossorigin="anonymous")
+        script.
+            var jokeArray = ['It can\'t quit vim', 'You gave it validation and it said "thank you"', 'You told it to get state and it annexed Puerto Rico', 'You made it read only and it went to the library', 'You asked it to blur and it poked you in the eye'];
+            var jokeIndex = Math.floor(Math.random() * jokeArray.length);
+            function getJoke() {
+                var joke = jokeArray[jokeIndex];
+                jokeIndex ++;
+                if (jokeIndex >= jokeArray.length) {
+                    jokeIndex = 0;
+                }
+                $('.joke .content').removeClass('anim');
+                setTimeout(function() {
+                    $('.joke .content').html(joke).addClass('anim');
+                }, 1);
+            }
+            getJoke();
+            $('.more-jokes').click(getJoke);
         script(src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js",integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7",crossorigin="anonymous")
