@@ -40,9 +40,9 @@ html(lang="en")
                     jokeIndex = 0;
                 }
                 $('.joke .content').removeClass('anim');
-                setTimeout(function() {
+                requestAnimationFrame(function() {
                     $('.joke .content').html(joke).addClass('anim');
-                }, 1);
+                });
             }
             getJoke();
             $('.more-jokes').click(getJoke);
