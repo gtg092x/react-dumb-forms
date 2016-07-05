@@ -1,9 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><title>React Dumb Forms</title><link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"><script src="https://use.fontawesome.com/9237579915.js"></script><link href="style.css" rel="stylesheet"><meta charset="UTF-8"></head><body><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#validation">Customization</a><a class="nav-link" href="examples/web/">Examples</a><a class="nav-link github" href="https://github.com/gtg092x/react-dumb-forms" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><!--span.fa.fa-hand-o-left--><!--span.fa.fa-smile-o--><!--span.fa.fa-hand-o-right--><span class="text">Your Form is so Dumb</span><div class="joke"><a class="content" target="blank" href="https://www.youtube.com/watch?v=HP8sofAN4xc">&nbsp;</a><button class="more-jokes btn btn-link fa fa-refresh" type="button"></button></div></h1></div><div class="container" id="readme"><h1 id="react-dumb-forms">React Dumb Forms</h1>
+<!DOCTYPE html><html lang="en"><head><title>React Dumb Forms</title><link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"><script src="https://use.fontawesome.com/9237579915.js"></script><link href="examples/web/style.css" rel="stylesheet"><meta charset="UTF-8"></head><body><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#native">Native</a><a class="nav-link" href="#validation">Customization</a><a class="nav-link" href="examples/web/">Examples</a><a class="nav-link github" href="https://github.com/gtg092x/react-dumb-forms" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><!--span.fa.fa-hand-o-left--><!--span.fa.fa-smile-o--><!--span.fa.fa-hand-o-right--><span class="text">Your Form is so Dumb</span><div class="joke"><a class="content" target="blank" href="https://www.youtube.com/watch?v=HP8sofAN4xc">&nbsp;</a><button class="more-jokes btn btn-link fa fa-refresh" type="button"></button></div></h1></div><div class="container" id="readme"><h1 id="react-dumb-forms">React Dumb Forms</h1>
 <p>Functional forms with validation plugins powered by <a href="http://facebook.github.io/react/">React</a>.</p>
 <h2 id="installation">Installation</h2>
 <pre><code>% npm install react-dumb-forms
 </code></pre><h2 id="usage">Usage</h2>
-<p>###React Dumb Forms is a toolset for building simple, deterministic forms</p>
+<h3 id="react-dumb-forms-is-a-toolset-for-building-simple-deterministic-forms">React Dumb Forms is a toolset for building simple, deterministic forms</h3>
 <p>Getting tired of managing custom re-implementations of every kind of input? Yeah, me too. With React Dumb Forms, you can use every input already created by Facebook and every custom input widget that implements <code>onChange</code> and <code>onBlur</code> - if those don&#39;t work for you - you can use presets to write your own!</p>
 <blockquote>
 <p>But wait, there&#39;s more</p>
@@ -58,6 +58,9 @@ class MySmartComponent extends React.Component{
     }
 }
 </code></pre>
+<h2 id="native">Native</h2>
+<h3 id="this-works-with-react-native-too">This works with React Native too</h3>
+<p>No way!</p>
 <h3 id="validation">Validation</h3>
 <p>We don&#39;t care what you use! You can use almost any validation system as long you can implement a few error fetching methods.  </p>
 <pre><code class="lang-js">import {setValidator} from &#39;react-dumb-forms&#39;;

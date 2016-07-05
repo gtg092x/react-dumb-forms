@@ -9,7 +9,7 @@ Functional forms with validation plugins powered by [React][].
 
 ## Usage
 
-###React Dumb Forms is a toolset for building simple, deterministic forms
+### React Dumb Forms is a toolset for building simple, deterministic forms
 
 Getting tired of managing custom re-implementations of every kind of input? Yeah, me too. With React Dumb Forms, you can use every input already created by Facebook and every custom input widget that implements `onChange` and `onBlur` - if those don't work for you - you can use presets to write your own!
 
@@ -73,6 +73,12 @@ class MySmartComponent extends React.Component{
     }
 }
 ```
+
+## Native
+
+### This works with React Native too
+
+No way!
 
 ### Validation
 
